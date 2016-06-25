@@ -6,3 +6,4 @@ license = "MIT/Apache-2.0"
 description = "Fast functions for printing integer primitives to an io::Write"
 repository = "https://github.com/dtolnay/itoa"
 documentation = "https://github.com/dtolnay/itoa"
+include = ["Cargo.toml", "src/**/*.rs"]

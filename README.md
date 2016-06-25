@@ -11,6 +11,10 @@ implementation comes straight from
 but avoids the performance penalty of going through
 [`fmt::Formatter`](https://doc.rust-lang.org/std/fmt/struct.Formatter.html).
 
+## Performance
+
+![performance](https://raw.githubusercontent.com/dtolnay/itoa/master/performance.png)
+
 ## Functions
 
 ```rust
