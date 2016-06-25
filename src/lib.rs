@@ -8,6 +8,7 @@
 
 use std::{io, mem, ptr, slice};
 
+#[inline]
 pub fn write<W: io::Write, V: Integer>(wr: &mut W, value: V) -> io::Result<()> {
     value.write(wr)
 }
