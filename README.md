@@ -20,8 +20,8 @@ but avoids the performance penalty of going through
 ```rust
 extern crate itoa;
 
-let buf = Vec::new();
-itoa::write(buf, 128u64).unwrap();
+let mut buf = Vec::new();
+itoa::write(&mut buf, 128u64).unwrap();
 ```
 
 The function signature is:
