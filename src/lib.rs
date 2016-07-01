@@ -35,11 +35,10 @@ macro_rules! impl_Integer {
             let mut n = if is_nonnegative {
                 self as $conv_fn
             } else {
-                try!(wr.write_all(b"-"));
                 // convert the negative num to positive by summing 1 to it's 2 complement
                 (!(self as $conv_fn)).wrapping_add(1)
             };
-            let mut buf: [u8; 20] = unsafe { mem::uninitialized() };
+            let mut buf: [u8; 21] = unsafe { mem::uninitialized() };
             let mut curr = buf.len() as isize;
             let buf_ptr = buf.as_mut_ptr();
             let lut_ptr = DEC_DIGITS_LUT.as_ptr();
@@ -78,6 +77,11 @@ macro_rules! impl_Integer {
                     let d1 = n << 1;
                     curr -= 2;
                     ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
+                }
+
+                if !is_nonnegative {
+                    curr -= 1;
+                    *buf_ptr.offset(curr) = b'-';
                 }
             }
 
