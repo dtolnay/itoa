@@ -11,6 +11,9 @@ implementation comes straight from
 but avoids the performance penalty of going through
 [`fmt::Formatter`](https://doc.rust-lang.org/std/fmt/struct.Formatter.html).
 
+See also [`dtoa`](https://github.com/dtolnay/dtoa) for printing floating point
+primitives.
+
 ## Performance
 
 ![performance](https://raw.githubusercontent.com/dtolnay/itoa/master/performance.png)
