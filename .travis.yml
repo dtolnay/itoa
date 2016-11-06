@@ -4,6 +4,3 @@ language: rust
 
 rust:
   - nightly
-
-notifications:
-  email: false
