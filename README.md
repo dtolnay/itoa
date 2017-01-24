@@ -30,7 +30,7 @@ itoa::write(&mut buf, 128u64).unwrap();
 The function signature is:
 
 ```rust
-fn write<W: io::Write, V: itoa::Integer>(writer: &mut W, value: V) -> io::Result<()>
+fn write<W: io::Write + ?Sized, V: itoa::Integer>(writer: &mut W, value: V) -> io::Result<()>
 ```
 
 where `itoa::Integer` is implemented for `i8`, `u8`, `i16`, `u16`, `i32`, `u32`,
@@ -43,7 +43,7 @@ following in `Cargo.toml`:
 
 ```toml
 [dependencies]
-itoa = "0.1"
+itoa = "0.2"
 ```
 
 ## License
