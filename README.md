@@ -23,18 +23,26 @@ primitives.
 ```rust
 extern crate itoa;
 
+// write to a vector or other io::Write
 let mut buf = Vec::new();
-itoa::write(&mut buf, 128u64).unwrap();
+itoa::write(&mut buf, 128u64)?;
+println!("{:?}", buf);
+
+// write to a stack buffer
+let mut bytes = [b'\0'; 20];
+let n = itoa::write(&mut bytes[..], 128u64)?;
+println!("{:?}", &bytes[..n]);
 ```
 
 The function signature is:
 
 ```rust
-fn write<W: io::Write + ?Sized, V: itoa::Integer>(writer: &mut W, value: V) -> io::Result<()>
+fn write<W: io::Write, V: itoa::Integer>(writer: W, value: V) -> io::Result<usize>
 ```
 
 where `itoa::Integer` is implemented for `i8`, `u8`, `i16`, `u16`, `i32`, `u32`,
-`i64`, `u64`, `isize` and `usize`.
+`i64`, `u64`, `isize` and `usize`. The return value gives the number of bytes
+written.
 
 ## Dependency
 
