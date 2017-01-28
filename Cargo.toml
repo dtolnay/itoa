@@ -1,6 +1,6 @@
 [package]
 name = "itoa"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = "Fast functions for printing integer primitives to an io::Write"
