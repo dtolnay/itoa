@@ -7,9 +7,9 @@ macro_rules! test {
         $(
             #[test]
             fn $name() {
-                let mut buf = Vec::with_capacity(20);
-                itoa::write(&mut buf, $value).unwrap();
-                assert_eq!(buf, $expected.as_bytes());
+                let mut buf = [b'\0'; 20];
+                let len = itoa::write(&mut buf[..], $value).unwrap();
+                assert_eq!(&buf[0..len], $expected.as_bytes());
             }
         )*
     }
