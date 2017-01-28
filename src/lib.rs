@@ -9,12 +9,12 @@
 use std::{io, mem, ptr, slice};
 
 #[inline]
-pub fn write<W: io::Write + ?Sized, V: Integer>(wr: &mut W, value: V) -> io::Result<()> {
+pub fn write<W: io::Write, V: Integer>(wr: W, value: V) -> io::Result<()> {
     value.write(wr)
 }
 
 pub trait Integer {
-    fn write<W: io::Write + ?Sized>(self, &mut W) -> io::Result<()>;
+    fn write<W: io::Write>(self, W) -> io::Result<()>;
 }
 
 const DEC_DIGITS_LUT: &'static[u8] =
@@ -30,7 +30,7 @@ macro_rules! impl_Integer {
     ($($t:ident),* as $conv_fn:ident) => ($(
     impl Integer for $t {
         #[allow(unused_comparisons)]
-        fn write<W: io::Write + ?Sized>(self, wr: &mut W) -> io::Result<()> {
+        fn write<W: io::Write>(self, mut wr: W) -> io::Result<()> {
             let is_nonnegative = self >= 0;
             let mut n = if is_nonnegative {
                 self as $conv_fn
