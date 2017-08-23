@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![doc(html_root_url = "https://docs.rs/itoa/0.3.1")]
+#![doc(html_root_url = "https://docs.rs/itoa/0.3.2")]
 
 use std::{io, mem, ptr, slice};
 
