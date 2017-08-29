@@ -19,6 +19,10 @@ pub trait Integer {
     fn write<W: io::Write>(self, W) -> io::Result<usize>;
 }
 
+trait IntegerPrivate {
+    fn write_to(self, buf: &mut [u8; MAX_LEN]) -> &[u8];
+}
+
 const DEC_DIGITS_LUT: &'static[u8] =
     b"0001020304050607080910111213141516171819\
       2021222324252627282930313233343536373839\
@@ -26,13 +30,24 @@ const DEC_DIGITS_LUT: &'static[u8] =
       6061626364656667686970717273747576777879\
       8081828384858687888990919293949596979899";
 
+const MAX_LEN: usize = 20;  // Tie between i64::MIN (including minus sign) and u64::MAX
+
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
     ($($t:ident),* as $conv_fn:ident) => ($(
     impl Integer for $t {
-        #[allow(unused_comparisons)]
         fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
+            let mut buf = unsafe { mem::uninitialized() };
+            let bytes = self.write_to(&mut buf);
+            try!(wr.write_all(bytes));
+            Ok(bytes.len())
+        }
+    }
+
+    impl IntegerPrivate for $t {
+        #[allow(unused_comparisons)]
+        fn write_to(self, buf: &mut [u8; MAX_LEN]) -> &[u8] {
             let is_nonnegative = self >= 0;
             let mut n = if is_nonnegative {
                 self as $conv_fn
@@ -40,7 +55,6 @@ macro_rules! impl_Integer {
                 // convert the negative num to positive by summing 1 to it's 2 complement
                 (!(self as $conv_fn)).wrapping_add(1)
             };
-            let mut buf: [u8; 20] = unsafe { mem::uninitialized() };
             let mut curr = buf.len() as isize;
             let buf_ptr = buf.as_mut_ptr();
             let lut_ptr = DEC_DIGITS_LUT.as_ptr();
@@ -88,8 +102,7 @@ macro_rules! impl_Integer {
             }
 
             let len = buf.len() - curr as usize;
-            try!(wr.write_all(unsafe { slice::from_raw_parts(buf_ptr.offset(curr), len) }));
-            Ok(len)
+            unsafe { slice::from_raw_parts(buf_ptr.offset(curr), len) }
         }
     })*);
 }
