@@ -19,6 +19,7 @@ test!(
     test_0u64(0u64, "0"),
     test_HALFu64(<u32>::max_value() as u64, "4294967295"),
     test_MAXu64(<u64>::max_value(), "18446744073709551615"),
+    test_MINi64(<i64>::min_value(), "-9223372036854775808"),
 
     test_0i16(0i16, "0"),
     test_MINi16(<i16>::min_value(), "-32768"),

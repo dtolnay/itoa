@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![doc(html_root_url = "https://docs.rs/itoa/0.3.2")]
+#![doc(html_root_url = "https://docs.rs/itoa/0.3.3")]
 
 use std::{io, mem, ptr, slice};
 
@@ -37,7 +37,6 @@ macro_rules! impl_Integer {
             let mut n = if is_nonnegative {
                 self as $conv_fn
             } else {
-                try!(wr.write_all(b"-"));
                 // convert the negative num to positive by summing 1 to it's 2 complement
                 (!(self as $conv_fn)).wrapping_add(1)
             };
@@ -81,13 +80,15 @@ macro_rules! impl_Integer {
                     curr -= 2;
                     ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
                 }
+
+                if !is_nonnegative {
+                    curr -= 1;
+                    *buf_ptr.offset(curr) = b'-';
+                }
             }
 
-            let mut len = buf.len() - curr as usize;
+            let len = buf.len() - curr as usize;
             try!(wr.write_all(unsafe { slice::from_raw_parts(buf_ptr.offset(curr), len) }));
-            if !is_nonnegative {
-                len += 1;
-            }
             Ok(len)
         }
     })*);
