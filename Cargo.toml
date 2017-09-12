@@ -9,3 +9,6 @@ documentation = "https://github.com/dtolnay/itoa"
 categories = ["value-formatting"]
 readme = "README.md"
 exclude = ["performance.png"]
+
+[features]
+i128 = []
