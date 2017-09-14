@@ -10,6 +10,9 @@
 
 #![cfg_attr(feature = "i128", feature(i128_type, i128))]
 
+#[cfg(feature = "i128")]
+mod udiv128;
+
 use std::{io, mem, ptr, slice};
 
 #[inline]
@@ -37,7 +40,19 @@ const MAX_LEN: usize = 40; // i128::MIN (including minus sign)
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
-    ($($t:ident),* as $conv_fn:ident) => ($(
+    ($($t:ident),* as $conv_fn:ident) =>
+        (impl_Integer!(
+            $($t),* as $conv_fn,
+            (|n:$conv_fn, d:$conv_fn, rem:Option<&mut $conv_fn>| {
+                match rem {
+                    Some(rem) => *rem = n % d,
+                    _ => {},
+                }
+                n / d
+            })
+        ););
+
+    ($($t:ident),* as $conv_fn:ident, $divmod:expr) => ($(
     impl Integer for $t {
         fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
             let mut buf = unsafe { mem::uninitialized() };
@@ -65,11 +80,13 @@ macro_rules! impl_Integer {
                 // eagerly decode 4 characters at a time
                 if <$t>::max_value() as u64 >= 10000 {
                     while n >= 10000 {
-                        let rem = (n % 10000) as isize;
-                        n /= 10000;
+                        let mut rem = 0;
+                        // division with remainder on u128 is badly optimized by LLVM.
+                        // see “udiv128.rs” for more info.
+                        n = $divmod(n, 10000, Some(&mut rem));
 
-                        let d1 = (rem / 100) << 1;
-                        let d2 = (rem % 100) << 1;
+                        let d1 = (rem as isize / 100) << 1;
+                        let d2 = (rem as isize % 100) << 1;
                         curr -= 4;
                         ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
                         ptr::copy_nonoverlapping(lut_ptr.offset(d2), buf_ptr.offset(curr + 2), 2);
@@ -117,5 +134,5 @@ impl_Integer!(isize, usize as u16);
 impl_Integer!(isize, usize as u32);
 #[cfg(target_pointer_width = "64")]
 impl_Integer!(isize, usize as u64);
-#[cfg(feature = "i128")]
-impl_Integer!(i128, u128 as u128);
+#[cfg(all(feature = "i128"))]
+impl_Integer!(i128, u128 as u128, udiv128::udivmodti4);
