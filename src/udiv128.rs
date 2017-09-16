@@ -21,25 +21,25 @@
 // (https://github.com/rust-lang/rust/issues/44545) and to allow function
 // inlining which doesn’t happen with the intrinsic.
 
-pub fn udivmod_10000(n: u128) -> (u128, isize) {
+pub fn udivmod_1e19(n: u128) -> (u128, u64) {
+    let d = 10_000_000_000_000_000_000_u64; // 10^19
+
     let high = (n >> 64) as u64;
     if high == 0 {
         let low = n as u64;
-        return ((low / 10000) as u128, (low % 10000) as isize);
+        return ((low / d) as u128, low % d);
     }
 
-    let leading_zeros_10000 = 114;
-    debug_assert_eq!(leading_zeros_10000, 10000u128.leading_zeros());
-    let sr = 1 + leading_zeros_10000 - high.leading_zeros();
+    let sr = 65 - high.leading_zeros();
 
-    // 52 <= sr <= 115
+    // 2 <= sr <= 65
     let mut q: u128 = n << (128 - sr);
     let mut r: u128 = n >> sr;
     let mut carry: u64 = 0;
 
     // Don't use a range because they may generate references to memcpy in unoptimized code
     //
-    // Loop invariants:  r < 10000; carry is 0 or 1
+    // Loop invariants:  r < d; carry is 0 or 1
     let mut i = 0;
     while i < sr {
         i += 1;
@@ -49,14 +49,14 @@ pub fn udivmod_10000(n: u128) -> (u128, isize) {
         q = (q << 1) | carry as u128;
 
         // carry = 0
-        // if r >= 10000 {
-        //     r -= 10000;
+        // if r >= d {
+        //     r -= d;
         //     carry = 1;
         // }
-        let s = 10000u128.wrapping_sub(r).wrapping_sub(1) as i128 >> 127;
+        let s = (d as u128).wrapping_sub(r).wrapping_sub(1) as i128 >> 127;
         carry = (s & 1) as u64;
-        r -= 10000u128 & s as u128;
+        r -= (d as u128) & s as u128;
     }
 
-    ((q << 1) | carry as u128, r as isize)
+    ((q << 1) | carry as u128, r as u64)
 }
