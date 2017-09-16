@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![doc(html_root_url = "https://docs.rs/itoa/0.3.3")]
+#![doc(html_root_url = "https://docs.rs/itoa/0.3.4")]
 
 #![cfg_attr(feature = "i128", feature(i128_type, i128))]
 
