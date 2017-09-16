@@ -43,16 +43,10 @@ macro_rules! impl_Integer {
     ($($t:ident),* as $conv_fn:ident) =>
         (impl_Integer!(
             $($t),* as $conv_fn,
-            (|n:$conv_fn, d:$conv_fn, rem:Option<&mut $conv_fn>| {
-                match rem {
-                    Some(rem) => *rem = n % d,
-                    _ => {},
-                }
-                n / d
-            })
+            |n:$conv_fn| (n / 10000, (n % 10000) as isize)
         ););
 
-    ($($t:ident),* as $conv_fn:ident, $divmod:expr) => ($(
+    ($($t:ident),* as $conv_fn:ident, $divmod_10000:expr) => ($(
     impl Integer for $t {
         fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
             let mut buf = unsafe { mem::uninitialized() };
@@ -80,13 +74,13 @@ macro_rules! impl_Integer {
                 // eagerly decode 4 characters at a time
                 if <$t>::max_value() as u64 >= 10000 {
                     while n >= 10000 {
-                        let mut rem = 0;
                         // division with remainder on u128 is badly optimized by LLVM.
                         // see “udiv128.rs” for more info.
-                        n = $divmod(n, 10000, Some(&mut rem));
+                        let (q, r) = $divmod_10000(n);
+                        n = q;
 
-                        let d1 = (rem as isize / 100) << 1;
-                        let d2 = (rem as isize % 100) << 1;
+                        let d1 = (r / 100) << 1;
+                        let d2 = (r % 100) << 1;
                         curr -= 4;
                         ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
                         ptr::copy_nonoverlapping(lut_ptr.offset(d2), buf_ptr.offset(curr + 2), 2);
@@ -135,4 +129,4 @@ impl_Integer!(isize, usize as u32);
 #[cfg(target_pointer_width = "64")]
 impl_Integer!(isize, usize as u64);
 #[cfg(all(feature = "i128"))]
-impl_Integer!(i128, u128 as u128, udiv128::udivmodti4);
+impl_Integer!(i128, u128 as u128, udiv128::udivmod_10000);
