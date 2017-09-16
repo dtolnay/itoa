@@ -40,13 +40,7 @@ const MAX_LEN: usize = 40; // i128::MIN (including minus sign)
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
-    ($($t:ident),* as $conv_fn:ident) =>
-        (impl_Integer!(
-            $($t),* as $conv_fn,
-            |n:$conv_fn| (n / 10000, (n % 10000) as isize)
-        ););
-
-    ($($t:ident),* as $conv_fn:ident, $divmod_10000:expr) => ($(
+    ($($t:ident),* as $conv_fn:ident) => ($(
     impl Integer for $t {
         fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
             let mut buf = unsafe { mem::uninitialized() };
@@ -74,13 +68,11 @@ macro_rules! impl_Integer {
                 // eagerly decode 4 characters at a time
                 if <$t>::max_value() as u64 >= 10000 {
                     while n >= 10000 {
-                        // division with remainder on u128 is badly optimized by LLVM.
-                        // see “udiv128.rs” for more info.
-                        let (q, r) = $divmod_10000(n);
-                        n = q;
+                        let rem = (n % 10000) as isize;
+                        n /= 10000;
 
-                        let d1 = (r / 100) << 1;
-                        let d2 = (r % 100) << 1;
+                        let d1 = (rem / 100) << 1;
+                        let d2 = (rem % 100) << 1;
                         curr -= 4;
                         ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
                         ptr::copy_nonoverlapping(lut_ptr.offset(d2), buf_ptr.offset(curr + 2), 2);
@@ -128,5 +120,73 @@ impl_Integer!(isize, usize as u16);
 impl_Integer!(isize, usize as u32);
 #[cfg(target_pointer_width = "64")]
 impl_Integer!(isize, usize as u64);
+
 #[cfg(all(feature = "i128"))]
-impl_Integer!(i128, u128 as u128, udiv128::udivmod_10000);
+macro_rules! impl_Integer128 {
+    ($($t:ident),*) => {$(
+        impl Integer for $t {
+            fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
+                let mut buf = unsafe { mem::uninitialized() };
+                let bytes = self.write_to(&mut buf);
+                try!(wr.write_all(bytes));
+                Ok(bytes.len())
+            }
+        }
+
+        impl IntegerPrivate for $t {
+            #[allow(unused_comparisons)]
+            fn write_to(self, buf: &mut [u8; MAX_LEN]) -> &[u8] {
+                let is_nonnegative = self >= 0;
+                let n = if is_nonnegative {
+                    self as u128
+                } else {
+                    // convert the negative num to positive by summing 1 to it's 2 complement
+                    (!(self as u128)).wrapping_add(1)
+                };
+                let mut curr = buf.len() as isize;
+                let buf_ptr = buf.as_mut_ptr();
+
+                unsafe {
+                    // Divide by 10^19 which is the highest power less than 2^64.
+                    let (n, rem) = udiv128::udivmod_1e19(n);
+                    curr -= rem.write_to(buf).len() as isize;
+
+                    if n != 0 {
+                        // Memset the base10 leading zeros of rem.
+                        let target = buf.len() as isize - 19;
+                        ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
+                        curr = target;
+
+                        // Divide by 10^19 again.
+                        let (n, rem) = udiv128::udivmod_1e19(n);
+                        let buf2 = buf_ptr.offset(curr - buf.len() as isize) as *mut _;
+                        curr -= rem.write_to(&mut *buf2).len() as isize;
+
+                        if n != 0 {
+                            // Memset the leading zeros.
+                            let target = buf.len() as isize - 38;
+                            ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
+                            curr = target;
+
+                            // There is at most one digit left
+                            // because u128::max / 10^19 / 10^19 is 3.
+                            curr -= 1;
+                            *buf_ptr.offset(curr) = (n as u8) + b'0';
+                        }
+                    }
+
+                    if !is_nonnegative {
+                        curr -= 1;
+                        *buf_ptr.offset(curr) = b'-';
+                    }
+
+                    let len = buf.len() - curr as usize;
+                    slice::from_raw_parts(buf_ptr.offset(curr), len)
+                }
+            }
+        }
+    )*};
+}
+
+#[cfg(all(feature = "i128"))]
+impl_Integer128!(i128, u128);
