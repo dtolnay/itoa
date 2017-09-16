@@ -65,8 +65,9 @@ macro_rules! impl_Integer {
                 let lut_ptr = DEC_DIGITS_LUT.as_ptr();
 
                 unsafe {
-                    // eagerly decode 4 characters at a time
-                    if <$t>::max_value() as u64 >= 10000 {
+                    // need at least 16 bits for the 4-characters-at-a-time to work.
+                    if mem::size_of::<$t>() >= 2 {
+                        // eagerly decode 4 characters at a time
                         while n >= 10000 {
                             let rem = (n % 10000) as isize;
                             n /= 10000;
