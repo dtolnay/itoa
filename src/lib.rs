@@ -10,6 +10,8 @@
 
 #![cfg_attr(feature = "i128", feature(i128_type, i128))]
 
+#![cfg_attr(feature = "cargo-clippy", allow(cast_lossless, unreadable_literal))]
+
 #[cfg(feature = "i128")]
 mod udiv128;
 
