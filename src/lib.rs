@@ -41,8 +41,8 @@ const MAX_LEN: usize = 40; // i128::MIN (including minus sign)
 
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
-macro_rules! impl_Integer {
-    ($($t:ident),* as $conv_fn:ident) => {$(
+macro_rules! impl_IntegerCommon {
+    ($t:ident) => {
         impl Integer for $t {
             fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
                 let mut buf = unsafe { mem::uninitialized() };
@@ -51,6 +51,12 @@ macro_rules! impl_Integer {
                 Ok(bytes.len())
             }
         }
+    };
+}
+
+macro_rules! impl_Integer {
+    ($($t:ident),* as $conv_fn:ident) => {$(
+        impl_IntegerCommon!($t);
 
         impl IntegerPrivate for $t {
             #[allow(unused_comparisons)]
@@ -128,14 +134,7 @@ impl_Integer!(isize, usize as u64);
 #[cfg(all(feature = "i128"))]
 macro_rules! impl_Integer128 {
     ($($t:ident),*) => {$(
-        impl Integer for $t {
-            fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
-                let mut buf = unsafe { mem::uninitialized() };
-                let bytes = self.write_to(&mut buf);
-                try!(wr.write_all(bytes));
-                Ok(bytes.len())
-            }
-        }
+        impl_IntegerCommon!($t);
 
         impl IntegerPrivate for $t {
             #[allow(unused_comparisons)]
