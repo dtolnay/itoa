@@ -15,11 +15,16 @@
 #[cfg(feature = "i128")]
 mod udiv128;
 
-use std::{io, mem, ptr, slice};
+use std::{fmt, io, mem, ptr, slice, str};
 
 #[inline]
 pub fn write<W: io::Write, V: Integer>(wr: W, value: V) -> io::Result<usize> {
     value.write(wr)
+}
+
+#[inline]
+pub fn fmt<W: fmt::Write, V: Integer>(wr: W, value: V) -> fmt::Result {
+    value.fmt(wr)
 }
 
 // Seal to prevent downstream implementations of the Integer trait.
@@ -29,6 +34,8 @@ mod private {
 
 pub trait Integer: private::Sealed {
     fn write<W: io::Write>(self, W) -> io::Result<usize>;
+
+    fn fmt<W: fmt::Write>(self, W) -> fmt::Result;
 }
 
 trait IntegerPrivate {
@@ -54,6 +61,12 @@ macro_rules! impl_IntegerCommon {
                 let bytes = self.write_to(&mut buf);
                 try!(wr.write_all(bytes));
                 Ok(bytes.len())
+            }
+
+            fn fmt<W: fmt::Write>(self, mut wr: W) -> fmt::Result {
+                let mut buf = unsafe { mem::uninitialized() };
+                let bytes = self.write_to(&mut buf);
+                wr.write_str(unsafe { str::from_utf8_unchecked(bytes) })
             }
         }
 

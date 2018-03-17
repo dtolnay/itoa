@@ -20,6 +20,10 @@ macro_rules! test {
                 let mut buf = [b'\0'; 40];
                 let len = itoa::write(&mut buf[..], $value).unwrap();
                 assert_eq!(&buf[0..len], $expected.as_bytes());
+
+                let mut s = String::new();
+                itoa::fmt(&mut s, $value).unwrap();
+                assert_eq!(s, $expected);
             }
         )*
     }
