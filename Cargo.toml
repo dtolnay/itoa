@@ -11,4 +11,6 @@ readme = "README.md"
 exclude = ["performance.png"]
 
 [features]
+default = ["std"]
 i128 = []
+std = []

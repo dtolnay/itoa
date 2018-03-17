@@ -53,6 +53,9 @@ where `itoa::Integer` is implemented for `i8`, `u8`, `i16`, `u16`, `i32`, `u32`,
 only available with the nightly compiler when the `i128` feature is enabled for
 this crate. The return value gives the number of bytes written.
 
+The `write` function is only available when the `std` feature is enabled
+(default is enabled).
+
 ## Dependency
 
 Itoa is available on [crates.io](https://crates.io/crates/itoa). Use the

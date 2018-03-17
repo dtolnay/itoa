@@ -8,6 +8,8 @@
 
 #![doc(html_root_url = "https://docs.rs/itoa/0.3.4")]
 
+#![cfg_attr(not(feature = "std"), no_std)]
+
 #![cfg_attr(feature = "i128", feature(i128_type, i128))]
 
 #![cfg_attr(feature = "cargo-clippy", allow(cast_lossless, unreadable_literal))]
@@ -15,8 +17,13 @@
 #[cfg(feature = "i128")]
 mod udiv128;
 
+#[cfg(feature = "std")]
 use std::{fmt, io, mem, ptr, slice, str};
 
+#[cfg(not(feature = "std"))]
+use core::{fmt, mem, ptr, slice, str};
+
+#[cfg(feature = "std")]
 #[inline]
 pub fn write<W: io::Write, V: Integer>(wr: W, value: V) -> io::Result<usize> {
     value.write(wr)
@@ -33,6 +40,7 @@ mod private {
 }
 
 pub trait Integer: private::Sealed {
+    #[cfg(feature = "std")]
     fn write<W: io::Write>(self, W) -> io::Result<usize>;
 
     fn fmt<W: fmt::Write>(self, W) -> fmt::Result;
@@ -56,6 +64,7 @@ const MAX_LEN: usize = 40; // i128::MIN (including minus sign)
 macro_rules! impl_IntegerCommon {
     ($t:ident) => {
         impl Integer for $t {
+            #[cfg(feature = "std")]
             fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
                 let mut buf = unsafe { mem::uninitialized() };
                 let bytes = self.write_to(&mut buf);
