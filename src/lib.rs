@@ -40,9 +40,13 @@ mod private {
 }
 
 pub trait Integer: private::Sealed {
+    // Not public API.
+    #[doc(hidden)]
     #[cfg(feature = "std")]
     fn write<W: io::Write>(self, W) -> io::Result<usize>;
 
+    // Not public API.
+    #[doc(hidden)]
     fn fmt<W: fmt::Write>(self, W) -> fmt::Result;
 }
 
