@@ -63,7 +63,7 @@ following in `Cargo.toml`:
 
 ```toml
 [dependencies]
-itoa = "0.3"
+itoa = "0.4"
 ```
 
 ## License
