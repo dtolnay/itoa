@@ -23,12 +23,14 @@ use std::{fmt, io, mem, ptr, slice, str};
 #[cfg(not(feature = "std"))]
 use core::{fmt, mem, ptr, slice, str};
 
+/// Write integer to an `io::Write`.
 #[cfg(feature = "std")]
 #[inline]
 pub fn write<W: io::Write, V: Integer>(wr: W, value: V) -> io::Result<usize> {
     value.write(wr)
 }
 
+/// Write integer to an `fmt::Write`.
 #[inline]
 pub fn fmt<W: fmt::Write, V: Integer>(wr: W, value: V) -> fmt::Result {
     value.fmt(wr)
@@ -39,6 +41,9 @@ mod private {
     pub trait Sealed {}
 }
 
+/// An integer that can be formatted by `itoa::write` and `itoa::fmt`.
+///
+/// This trait is sealed and cannot be implemented for types outside of itoa.
 pub trait Integer: private::Sealed {
     // Not public API.
     #[doc(hidden)]
