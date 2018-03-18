@@ -43,9 +43,9 @@ println!("{}", s);
 The function signatures are:
 
 ```rust
-fn write<W: io::Write, V: itoa::Integer>(writer: W, value: V) -> io::Result<usize>
+fn write<W: io::Write, V: itoa::Integer>(writer: W, value: V) -> io::Result<usize>;
 
-fn fmt<W: fmt::Write, V: itoa::Integer>(writer: W, value: V) -> fmt::Result
+fn fmt<W: fmt::Write, V: itoa::Integer>(writer: W, value: V) -> fmt::Result;
 ```
 
 where `itoa::Integer` is implemented for `i8`, `u8`, `i16`, `u16`, `i32`, `u32`,
