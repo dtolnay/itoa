@@ -22,7 +22,12 @@ pub fn write<W: io::Write, V: Integer>(wr: W, value: V) -> io::Result<usize> {
     value.write(wr)
 }
 
-pub trait Integer {
+// Seal to prevent downstream implementations of the Integer trait.
+mod private {
+    pub trait Sealed {}
+}
+
+pub trait Integer: private::Sealed {
     fn write<W: io::Write>(self, W) -> io::Result<usize>;
 }
 
@@ -51,6 +56,8 @@ macro_rules! impl_IntegerCommon {
                 Ok(bytes.len())
             }
         }
+
+        impl private::Sealed for $t {}
     };
 }
 
