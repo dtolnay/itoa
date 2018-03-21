@@ -72,6 +72,7 @@ macro_rules! impl_IntegerCommon {
     ($max_len:expr, $t:ident) => {
         impl Integer for $t {
             #[cfg(feature = "std")]
+            #[inline]
             fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
                 let mut buf: [u8; $max_len] = unsafe { mem::uninitialized() };
                 let bytes = self.write_to(&mut buf);
@@ -79,6 +80,7 @@ macro_rules! impl_IntegerCommon {
                 Ok(bytes.len())
             }
 
+            #[inline]
             fn fmt<W: fmt::Write>(self, mut wr: W) -> fmt::Result {
                 let mut buf: [u8; $max_len] = unsafe { mem::uninitialized() };
                 let bytes = self.write_to(&mut buf);
@@ -95,6 +97,7 @@ macro_rules! impl_Integer {
 
         impl IntegerPrivate<[u8; $max_len]> for $t {
             #[allow(unused_comparisons)]
+            #[inline]
             fn write_to(self, buf: &mut [u8; $max_len]) -> &[u8] {
                 let is_nonnegative = self >= 0;
                 let mut n = if is_nonnegative {
@@ -198,6 +201,7 @@ macro_rules! impl_Integer128 {
 
         impl IntegerPrivate<[u8; $max_len]> for $t {
             #[allow(unused_comparisons)]
+            #[inline]
             fn write_to(self, buf: &mut [u8; $max_len]) -> &[u8] {
                 let is_nonnegative = self >= 0;
                 let n = if is_nonnegative {
