@@ -189,7 +189,7 @@ impl_Integer!(I64_MAX_LEN => i64, U64_MAX_LEN => u64 as u64);
 impl_Integer!(I16_MAX_LEN => isize, U16_MAX_LEN => usize as u16);
 
 #[cfg(target_pointer_width = "32")]
-impl_Integer!( I32_MAX_LEN => isize, U32_MAX_LEN => usize as u32);
+impl_Integer!(I32_MAX_LEN => isize, U32_MAX_LEN => usize as u32);
 
 #[cfg(target_pointer_width = "64")]
 impl_Integer!(I64_MAX_LEN => isize, U64_MAX_LEN => usize as u64);
