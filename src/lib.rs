@@ -93,7 +93,8 @@ macro_rules! impl_IntegerCommon {
 }
 
 macro_rules! impl_Integer {
-    (private $($max_len:expr => $t:ident),* as $conv_fn:ident) => {$(
+    ($($max_len:expr => $t:ident),* as $conv_fn:ident) => {$(
+        impl_IntegerCommon!($max_len, $t);
 
         impl IntegerPrivate<[u8; $max_len]> for $t {
             #[allow(unused_comparisons)]
@@ -158,11 +159,6 @@ macro_rules! impl_Integer {
             }
         }
     )*};
-
-    ($($max_len:expr => $t:ident),* as $conv_fn:ident) => {
-        $(impl_IntegerCommon!($max_len, $t);)*
-        impl_Integer!(private $($max_len => $t),* as $conv_fn);
-    };
 }
 
 const I8_MAX_LEN: usize = 4;
@@ -216,7 +212,8 @@ macro_rules! impl_Integer128 {
                 unsafe {
                     // Divide by 10^19 which is the highest power less than 2^64.
                     let (n, rem) = udiv128::udivmod_1e19(n);
-                    curr -= rem.write_to(buf).len() as isize;
+                    let buf1 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [u8; U64_MAX_LEN];
+                    curr -= rem.write_to(&mut *buf1).len() as isize;
 
                     if n != 0 {
                         // Memset the base10 leading zeros of rem.
@@ -226,7 +223,7 @@ macro_rules! impl_Integer128 {
 
                         // Divide by 10^19 again.
                         let (n, rem) = udiv128::udivmod_1e19(n);
-                        let buf2 = buf_ptr.offset(curr - buf.len() as isize) as *mut [u8; $max_len];
+                        let buf2 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [u8; U64_MAX_LEN];
                         curr -= rem.write_to(&mut *buf2).len() as isize;
 
                         if n != 0 {
@@ -259,9 +256,6 @@ macro_rules! impl_Integer128 {
 const U128_MAX_LEN: usize = 39;
 #[cfg(all(feature = "i128"))]
 const I128_MAX_LEN: usize = 40;
-
-#[cfg(all(feature = "i128"))]
-impl_Integer!(private U128_MAX_LEN => u64, I128_MAX_LEN => u64 as u64);
 
 #[cfg(all(feature = "i128"))]
 impl_Integer128!(I128_MAX_LEN => i128, U128_MAX_LEN => u128);
