@@ -9,6 +9,10 @@ matrix:
       env:
       - FEATURES="i128"
       - BUILD_BENCH="true"
+    - rust: 1.0.0
+      script: cargo build
+    - rust: 1.20.0
+      script: cargo test
 
 script:
   - cargo build --verbose --features "$FEATURES"
