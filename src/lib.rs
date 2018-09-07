@@ -26,14 +26,44 @@ use core::{fmt, mem, ptr, slice, str};
 /// Write integer to an `io::Write`.
 #[cfg(feature = "std")]
 #[inline]
-pub fn write<W: io::Write, V: Integer>(wr: W, value: V) -> io::Result<usize> {
-    value.write(wr)
+pub fn write<W: io::Write, V: Integer>(mut wr: W, value: V) -> io::Result<usize> {
+    let mut buf = Buffer::new();
+    let s = buf.format(value);
+    try!(wr.write_all(s.as_bytes()));
+    Ok(s.len())
 }
 
 /// Write integer to an `fmt::Write`.
 #[inline]
-pub fn fmt<W: fmt::Write, V: Integer>(wr: W, value: V) -> fmt::Result {
-    value.fmt(wr)
+pub fn fmt<W: fmt::Write, V: Integer>(mut wr: W, value: V) -> fmt::Result {
+    let mut buf = Buffer::new();
+    wr.write_str(buf.format(value))
+}
+
+/// A safe API for formatting integers to text.
+#[derive(Copy, Clone)]
+pub struct Buffer {
+    bytes: [u8; I128_MAX_LEN],
+}
+
+impl Default for Buffer {
+    fn default() -> Buffer {
+        Buffer::new()
+    }
+}
+
+impl Buffer {
+    /// This is a cheap operation; you don't need to worry about reusing buffers
+    /// for efficiency.
+    pub fn new() -> Buffer {
+        Buffer { bytes: unsafe { mem::uninitialized() } }
+    }
+
+    /// Print an integer into this buffer and return a reference to its string representation
+    /// within the buffer
+    pub fn format<I: Integer>(&mut self, i: I) -> &str {
+        i.write(self)
+    }
 }
 
 // Seal to prevent downstream implementations of the Integer trait.
@@ -47,12 +77,7 @@ mod private {
 pub trait Integer: private::Sealed {
     // Not public API.
     #[doc(hidden)]
-    #[cfg(feature = "std")]
-    fn write<W: io::Write>(self, W) -> io::Result<usize>;
-
-    // Not public API.
-    #[doc(hidden)]
-    fn fmt<W: fmt::Write>(self, W) -> fmt::Result;
+    fn write<'a>(self, buf: &'a mut Buffer) -> &'a str;
 }
 
 trait IntegerPrivate<B> {
@@ -71,20 +96,16 @@ const DEC_DIGITS_LUT: &'static[u8] =
 macro_rules! impl_IntegerCommon {
     ($max_len:expr, $t:ident) => {
         impl Integer for $t {
-            #[cfg(feature = "std")]
             #[inline]
-            fn write<W: io::Write>(self, mut wr: W) -> io::Result<usize> {
-                let mut buf: [u8; $max_len] = unsafe { mem::uninitialized() };
-                let bytes = self.write_to(&mut buf);
-                try!(wr.write_all(bytes));
-                Ok(bytes.len())
-            }
-
-            #[inline]
-            fn fmt<W: fmt::Write>(self, mut wr: W) -> fmt::Result {
-                let mut buf: [u8; $max_len] = unsafe { mem::uninitialized() };
-                let bytes = self.write_to(&mut buf);
-                wr.write_str(unsafe { str::from_utf8_unchecked(bytes) })
+            fn write<'a>(self, buf: &'a mut Buffer) -> &'a str {
+                unsafe {
+                    debug_assert!($max_len <= I128_MAX_LEN);
+                    let buf = mem::transmute::<&mut [u8; I128_MAX_LEN], &mut [u8; $max_len]>(
+                        &mut buf.bytes
+                    );
+                    let bytes = self.write_to(buf);
+                    str::from_utf8_unchecked(bytes)
+                }
             }
         }
 
@@ -254,7 +275,6 @@ macro_rules! impl_Integer128 {
 
 #[cfg(all(feature = "i128"))]
 const U128_MAX_LEN: usize = 39;
-#[cfg(all(feature = "i128"))]
 const I128_MAX_LEN: usize = 40;
 
 #[cfg(all(feature = "i128"))]
