@@ -7,10 +7,11 @@
 // except according to those terms.
 
 #![doc(html_root_url = "https://docs.rs/itoa/0.4.2")]
-
 #![cfg_attr(not(feature = "std"), no_std)]
-
-#![cfg_attr(feature = "cargo-clippy", allow(cast_lossless, unreadable_literal))]
+#![cfg_attr(
+    feature = "cargo-clippy",
+    allow(cast_lossless, unreadable_literal)
+)]
 
 #[cfg(feature = "i128")]
 mod udiv128;
@@ -71,7 +72,9 @@ impl Buffer {
     /// for efficiency.
     #[inline]
     pub fn new() -> Buffer {
-        Buffer { bytes: unsafe { mem::uninitialized() } }
+        Buffer {
+            bytes: unsafe { mem::uninitialized() },
+        }
     }
 
     /// Print an integer into this buffer and return a reference to its string representation
@@ -99,8 +102,8 @@ trait IntegerPrivate<B> {
     fn write_to(self, buf: &mut B) -> &[u8];
 }
 
-const DEC_DIGITS_LUT: &'static[u8] =
-    b"0001020304050607080910111213141516171819\
+const DEC_DIGITS_LUT: &'static [u8] = b"\
+      0001020304050607080910111213141516171819\
       2021222324252627282930313233343536373839\
       4041424344454647484950515253545556575859\
       6061626364656667686970717273747576777879\
@@ -116,7 +119,7 @@ macro_rules! impl_IntegerCommon {
                 unsafe {
                     debug_assert!($max_len <= I128_MAX_LEN);
                     let buf = mem::transmute::<&mut [u8; I128_MAX_LEN], &mut [u8; $max_len]>(
-                        &mut buf.bytes
+                        &mut buf.bytes,
                     );
                     let bytes = self.write_to(buf);
                     str::from_utf8_unchecked(bytes)
@@ -212,7 +215,7 @@ impl_Integer!(
     I16_MAX_LEN => i16,
     U16_MAX_LEN => u16,
     I32_MAX_LEN => i32,
-    U32_MAX_LEN => u32 
+    U32_MAX_LEN => u32
     as u32);
 
 impl_Integer!(I64_MAX_LEN => i64, U64_MAX_LEN => u64 as u64);
