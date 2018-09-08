@@ -41,6 +41,14 @@ pub fn fmt<W: fmt::Write, V: Integer>(mut wr: W, value: V) -> fmt::Result {
 }
 
 /// A safe API for formatting integers to text.
+///
+/// # Example
+///
+/// ```rust
+/// let mut buffer = itoa::Buffer::new();
+/// let printed = buffer.format(1234);
+/// assert_eq!(printed, "1234");
+/// ```
 #[derive(Copy, Clone)]
 pub struct Buffer {
     bytes: [u8; I128_MAX_LEN],
@@ -62,7 +70,7 @@ impl Buffer {
     }
 
     /// Print an integer into this buffer and return a reference to its string representation
-    /// within the buffer
+    /// within the buffer.
     pub fn format<I: Integer>(&mut self, i: I) -> &str {
         i.write(self)
     }
