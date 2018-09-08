@@ -47,6 +47,7 @@ pub struct Buffer {
 }
 
 impl Default for Buffer {
+    #[inline]
     fn default() -> Buffer {
         Buffer::new()
     }
@@ -55,6 +56,7 @@ impl Default for Buffer {
 impl Buffer {
     /// This is a cheap operation; you don't need to worry about reusing buffers
     /// for efficiency.
+    #[inline]
     pub fn new() -> Buffer {
         Buffer { bytes: unsafe { mem::uninitialized() } }
     }
