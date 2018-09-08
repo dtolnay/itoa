@@ -49,7 +49,7 @@ pub fn fmt<W: fmt::Write, V: Integer>(mut wr: W, value: V) -> fmt::Result {
 /// let printed = buffer.format(1234);
 /// assert_eq!(printed, "1234");
 /// ```
-#[derive(Copy, Clone)]
+#[derive(Copy)]
 pub struct Buffer {
     bytes: [u8; I128_MAX_LEN],
 }
@@ -57,6 +57,13 @@ pub struct Buffer {
 impl Default for Buffer {
     #[inline]
     fn default() -> Buffer {
+        Buffer::new()
+    }
+}
+
+impl Clone for Buffer {
+    #[inline]
+    fn clone(&self) -> Self {
         Buffer::new()
     }
 }
