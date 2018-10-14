@@ -4,8 +4,10 @@ language: rust
 matrix:
   include:
     - rust: stable
+      env:
       - FEATURES="i128"
     - rust: beta
+      env:
       - FEATURES="i128"
     - rust: nightly
       env:
@@ -22,4 +24,3 @@ script:
   - cargo build --verbose --no-default-features --features "$FEATURES"
   - cargo test --verbose --no-default-features --features "$FEATURES"
   - if [ "$BUILD_BENCH" == "true" ]; then cargo bench --verbose --no-run --features "$FEATURES"; fi
-
