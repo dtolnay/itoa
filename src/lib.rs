@@ -43,7 +43,7 @@ pub fn fmt<W: fmt::Write, V: Integer>(mut wr: W, value: V) -> fmt::Result {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```
 /// let mut buffer = itoa::Buffer::new();
 /// let printed = buffer.format(1234);
 /// assert_eq!(printed, "1234");
