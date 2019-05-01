@@ -24,25 +24,35 @@ primitives.
 ```rust
 extern crate itoa;
 
-// write to a vector or other io::Write
-let mut buf = Vec::new();
-itoa::write(&mut buf, 128u64)?;
-println!("{:?}", buf);
+use std::{fmt, io};
 
-// write to a stack buffer
-let mut bytes = [b'\0'; 20];
-let n = itoa::write(&mut bytes[..], 128u64)?;
-println!("{:?}", &bytes[..n]);
+// You need the "std" feature enabled to use `itoa::write`.
+#[cfg(feature = "std")]
+fn write_to_vec() -> io::Result<()> {
+    // write to a vector or other io::Write
+    let mut buf = Vec::new();
+    itoa::write(&mut buf, 128u64)?;
+    println!("{:?}", buf);
 
-// write to a String
-let mut s = String::new();
-itoa::fmt(&mut s, 128u64)?;
-println!("{}", s);
+    // write to a stack buffer
+    let mut bytes = [b'\0'; 20];
+    let n = itoa::write(&mut bytes[..], 128u64)?;
+    println!("{:?}", &bytes[..n]);
+    Ok(())
+}
+
+fn write_to_string() -> fmt::Result {
+    // write to a String
+    let mut s = String::new();
+    itoa::fmt(&mut s, 128u64)?;
+    println!("{}", s);
+    Ok(())
+}
 ```
 
 The function signatures are:
 
-```rust
+```rust,ignore
 fn write<W: io::Write, V: itoa::Integer>(writer: W, value: V) -> io::Result<usize>;
 
 fn fmt<W: fmt::Write, V: itoa::Integer>(writer: W, value: V) -> fmt::Result;

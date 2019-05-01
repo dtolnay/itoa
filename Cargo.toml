@@ -17,3 +17,6 @@ std = []
 
 [badges]
 travis-ci = { repository = "dtolnay/itoa" }
+
+[dev-dependencies]
+doc-comment = "0.3"

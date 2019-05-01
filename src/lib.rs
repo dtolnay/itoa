@@ -13,6 +13,13 @@
     allow(cast_lossless, unreadable_literal)
 )]
 
+#[cfg(test)]
+#[macro_use]
+extern crate doc_comment;
+
+#[cfg(test)]
+doctest!("../README.md");
+
 #[cfg(feature = "i128")]
 mod udiv128;
 
