@@ -137,7 +137,7 @@ mod private {
 pub trait Integer: private::Sealed {
     // Not public API.
     #[doc(hidden)]
-    fn write<'a>(self, buf: &'a mut Buffer) -> &'a str;
+    fn write(self, buf: &mut Buffer) -> &str;
 }
 
 trait IntegerPrivate<B> {
@@ -157,7 +157,7 @@ macro_rules! impl_IntegerCommon {
     ($max_len:expr, $t:ident) => {
         impl Integer for $t {
             #[inline]
-            fn write<'a>(self, buf: &'a mut Buffer) -> &'a str {
+            fn write(self, buf: &mut Buffer) -> &str {
                 unsafe {
                     debug_assert!($max_len <= I128_MAX_LEN);
                     let buf = mem::transmute::<&mut [u8; I128_MAX_LEN], &mut [u8; $max_len]>(
