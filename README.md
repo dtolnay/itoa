@@ -25,9 +25,13 @@ See also [`dtoa`] for printing floating point primitives.
 itoa = "0.4"
 ```
 
+<br>
+
 ## Performance (lower is better)
 
 ![performance](https://raw.githubusercontent.com/dtolnay/itoa/master/performance.png)
+
+<br>
 
 ## Examples
 
