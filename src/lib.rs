@@ -50,9 +50,10 @@
 
 #![doc(html_root_url = "https://docs.rs/itoa/0.4.3")]
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
 #![cfg_attr(
     feature = "cargo-clippy",
-    allow(cast_lossless, unreadable_literal)
+    allow(const_static_lifetime, transmute_ptr_to_ptr),
 )]
 
 #[cfg(feature = "i128")]
