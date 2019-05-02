@@ -1,3 +1,53 @@
+//! This crate provides fast functions for printing integer primitives to an
+//! [`io::Write`] or a [`fmt::Write`]. The implementation comes straight from
+//! [libcore] but avoids the performance penalty of going through
+//! [`fmt::Formatter`].
+//!
+//! See also [`dtoa`] for printing floating point primitives.
+//!
+//! [`io::Write`]: https://doc.rust-lang.org/std/io/trait.Write.html
+//! [`fmt::Write`]: https://doc.rust-lang.org/core/fmt/trait.Write.html
+//! [libcore]: https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L201-L254
+//! [`fmt::Formatter`]: https://doc.rust-lang.org/std/fmt/struct.Formatter.html
+//! [`dtoa`]: https://github.com/dtolnay/dtoa
+//!
+//! <br>
+//!
+//! # Performance (lower is better)
+//!
+//! ![performance](https://raw.githubusercontent.com/dtolnay/itoa/master/performance.png)
+//!
+//! <br>
+//!
+//! # Examples
+//!
+//! ```edition2018
+//! use std::{fmt, io};
+//!
+//! fn demo_itoa_write() -> io::Result<()> {
+//!     // Write to a vector or other io::Write.
+//!     let mut buf = Vec::new();
+//!     itoa::write(&mut buf, 128u64)?;
+//!     println!("{:?}", buf);
+//!
+//!     // Write to a stack buffer.
+//!     let mut bytes = [0u8; 20];
+//!     let n = itoa::write(&mut bytes[..], 128u64)?;
+//!     println!("{:?}", &bytes[..n]);
+//!
+//!     Ok(())
+//! }
+//!
+//! fn demo_itoa_fmt() -> fmt::Result {
+//!     // Write to a string.
+//!     let mut s = String::new();
+//!     itoa::fmt(&mut s, 128u64)?;
+//!     println!("{}", s);
+//!
+//!     Ok(())
+//! }
+//! ```
+
 #![doc(html_root_url = "https://docs.rs/itoa/0.4.3")]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(
