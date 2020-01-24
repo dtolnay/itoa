@@ -71,8 +71,10 @@ use core::{fmt, mem, ptr, slice, str};
 pub fn write<W: io::Write, V: Integer>(mut wr: W, value: V) -> io::Result<usize> {
     let mut buf = Buffer::new();
     let s = buf.format(value);
-    try!(wr.write_all(s.as_bytes()));
-    Ok(s.len())
+    match wr.write_all(s.as_bytes()) {
+        Ok(()) => Ok(s.len()),
+        Err(e) => Err(e),
+    }
 }
 
 /// Write integer to an `fmt::Write`.
@@ -114,6 +116,7 @@ impl Buffer {
     /// This is a cheap operation; you don't need to worry about reusing buffers
     /// for efficiency.
     #[inline]
+    #[allow(deprecated)]
     pub fn new() -> Buffer {
         Buffer {
             bytes: unsafe { mem::uninitialized() },
