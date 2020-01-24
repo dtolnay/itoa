@@ -21,6 +21,8 @@ matrix:
 script:
   - cargo build --features "$FEATURES"
   - cargo test --features "$FEATURES"
+  - cargo test --features "$FEATURES" --release
   - cargo build --no-default-features --features "$FEATURES"
   - cargo test --tests --no-default-features --features "$FEATURES"
+  - cargo test --tests --no-default-features --features "$FEATURES" --release
   - if [ "$BUILD_BENCH" == "true" ]; then cargo bench --no-run --features "$FEATURES"; fi
