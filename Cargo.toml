@@ -15,8 +15,5 @@ default = ["std"]
 i128 = []
 std = []
 
-[badges]
-travis-ci = { repository = "dtolnay/itoa" }
-
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
