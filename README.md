@@ -1,7 +1,7 @@
 itoa
 ====
 
-[![Build Status](https://api.travis-ci.org/dtolnay/itoa.svg?branch=master)](https://travis-ci.org/dtolnay/itoa)
+[![Build Status](https://img.shields.io/github/workflow/status/dtolnay/itoa/CI/master)](https://github.com/dtolnay/itoa/actions?query=branch%3Amaster)
 [![Latest Version](https://img.shields.io/crates/v/itoa.svg)](https://crates.io/crates/itoa)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/itoa)
 
