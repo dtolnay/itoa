@@ -61,7 +61,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
 #![cfg_attr(
     feature = "cargo-clippy",
-    allow(const_static_lifetime, transmute_ptr_to_ptr),
+    allow(const_static_lifetime, transmute_ptr_to_ptr)
 )]
 
 #[cfg(feature = "i128")]
