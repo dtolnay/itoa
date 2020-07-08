@@ -319,31 +319,26 @@ macro_rules! impl_Integer128 {
 
                         // loops at most 5 times
                         loop {
-                            #[cfg(target_endian = "little")]
-                            const ORDER: [usize; 4] = [3, 2, 1, 0];
-                            #[cfg(target_endian = "big")]
-                            const ORDER: [usize; 4] = [0, 1, 2, 3];
-
                             let mut carry = 0u32;
                             let mut d;
 
                             // performs x /= 10^8 and store the remainder to carry
                             // TODO: speed up using SIMD intrinsics
                             {
-                                d = ((carry as u64) << 32) | x[ORDER[0]] as u64;
-                                x[ORDER[0]] = (d / 100_000_000) as u32;
+                                d = ((carry as u64) << 32) | x[3] as u64;
+                                x[3] = (d / 100_000_000) as u32;
                                 carry = (d % 100_000_000) as u32;
 
-                                d = ((carry as u64) << 32) | x[ORDER[1]] as u64;
-                                x[ORDER[1]] = (d / 100_000_000) as u32;
+                                d = ((carry as u64) << 32) | x[2] as u64;
+                                x[2] = (d / 100_000_000) as u32;
                                 carry = (d % 100_000_000) as u32;
 
-                                d = ((carry as u64) << 32) | x[ORDER[2]] as u64;
-                                x[ORDER[2]] = (d / 100_000_000) as u32;
+                                d = ((carry as u64) << 32) | x[1] as u64;
+                                x[1] = (d / 100_000_000) as u32;
                                 carry = (d % 100_000_000) as u32;
 
-                                d = ((carry as u64) << 32) | x[ORDER[3]] as u64;
-                                x[ORDER[3]] = (d / 100_000_000) as u32;
+                                d = ((carry as u64) << 32) | x[0] as u64;
+                                x[0] = (d / 100_000_000) as u32;
                                 carry = (d % 100_000_000) as u32;
                             }
 
