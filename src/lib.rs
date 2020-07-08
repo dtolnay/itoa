@@ -301,34 +301,77 @@ macro_rules! impl_Integer128 {
                 };
                 let mut curr = buf.len() as isize;
                 let buf_ptr = buf.as_mut_ptr();
+                let lut_ptr = DEC_DIGITS_LUT.as_ptr();
 
                 unsafe {
-                    // Divide by 10^19 which is the highest power less than 2^64.
-                    let (n, rem) = udiv128::udivmod_1e19(n);
-                    let buf1 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [u8; U64_MAX_LEN];
-                    curr -= rem.write_to(&mut *buf1).len() as isize;
+                    if n <= core::u64::MAX as u128 {
+                        let buf1 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [u8; U64_MAX_LEN];
+                        curr -= (n as u64).write_to(&mut *buf1).len() as isize;
+                    } else {
+                        // expand to per-32-bit elements.
+                        // should use `transmute_copy` because results of `to_ne_bytes`
+                        // may be not aligned.
+                        let l = n as u64;
+                        let h = (n >> 64) as u64;
+                        let mut x: [u32; 4] = [
+                            l as u32,
+                            (l >> 32) as u32,
+                            h as u32,
+                            (h >> 32) as u32,
+                        ];
 
-                    if n != 0 {
-                        // Memset the base10 leading zeros of rem.
-                        let target = buf.len() as isize - 19;
-                        ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
-                        curr = target;
+                        // loops at most 5 times
+                        loop {
+                            #[cfg(target_endian = "little")]
+                            const ORDER: [usize; 4] = [3, 2, 1, 0];
+                            #[cfg(target_endian = "big")]
+                            const ORDER: [usize; 4] = [0, 1, 2, 3];
 
-                        // Divide by 10^19 again.
-                        let (n, rem) = udiv128::udivmod_1e19(n);
-                        let buf2 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [u8; U64_MAX_LEN];
-                        curr -= rem.write_to(&mut *buf2).len() as isize;
+                            let mut carry = 0u32;
+                            let mut d;
 
-                        if n != 0 {
-                            // Memset the leading zeros.
-                            let target = buf.len() as isize - 38;
-                            ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
-                            curr = target;
+                            // performs x /= 10^8 and store the remainder to carry
+                            // TODO: speed up using SIMD intrinsics
+                            {
+                                d = ((carry as u64) << 32) | x[ORDER[0]] as u64;
+                                x[ORDER[0]] = (d / 100_000_000) as u32;
+                                carry = (d % 100_000_000) as u32;
 
-                            // There is at most one digit left
-                            // because u128::max / 10^19 / 10^19 is 3.
-                            curr -= 1;
-                            *buf_ptr.offset(curr) = (n as u8) + b'0';
+                                d = ((carry as u64) << 32) | x[ORDER[1]] as u64;
+                                x[ORDER[1]] = (d / 100_000_000) as u32;
+                                carry = (d % 100_000_000) as u32;
+
+                                d = ((carry as u64) << 32) | x[ORDER[2]] as u64;
+                                x[ORDER[2]] = (d / 100_000_000) as u32;
+                                carry = (d % 100_000_000) as u32;
+
+                                d = ((carry as u64) << 32) | x[ORDER[3]] as u64;
+                                x[ORDER[3]] = (d / 100_000_000) as u32;
+                                carry = (d % 100_000_000) as u32;
+                            }
+
+                            if x[0] == 0 && x[1] == 0 && x[2] == 0 && x[3] == 0 {
+                                // write value of `carry` to buffer
+                                let buf1 = buf_ptr.offset(curr - U32_MAX_LEN as isize) as *mut [u8; U32_MAX_LEN];
+                                curr -= carry.write_to(&mut *buf1).len() as isize;
+                                break;
+                            } else {
+                                // write value of `carry` to buffer with zero padding
+                                let a1 = (carry / 10000) as u16;
+                                let a2 = (carry % 10000) as u16;
+
+                                let b1 = ((a1 / 100) << 1) as isize;
+                                let b2 = ((a1 % 100) << 1) as isize;
+                                let b3 = ((a2 / 100) << 1) as isize;
+                                let b4 = ((a2 % 100) << 1) as isize;
+
+                                curr -= 8;
+
+                                ptr::copy_nonoverlapping(lut_ptr.offset(b1), buf_ptr.offset(curr), 2);
+                                ptr::copy_nonoverlapping(lut_ptr.offset(b2), buf_ptr.offset(curr + 2), 2);
+                                ptr::copy_nonoverlapping(lut_ptr.offset(b3), buf_ptr.offset(curr + 4), 2);
+                                ptr::copy_nonoverlapping(lut_ptr.offset(b4), buf_ptr.offset(curr + 6), 2);
+                            }
                         }
                     }
 
