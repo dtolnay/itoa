@@ -64,9 +64,6 @@
     allow(const_static_lifetime, transmute_ptr_to_ptr)
 )]
 
-#[cfg(feature = "i128")]
-mod udiv128;
-
 #[cfg(feature = "std")]
 use std::{fmt, io, mem, ptr, slice, str};
 
