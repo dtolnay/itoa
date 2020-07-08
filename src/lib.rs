@@ -65,10 +65,10 @@
 )]
 
 #[cfg(feature = "std")]
-use std::{fmt, io, mem, ptr, slice, str};
+use std::{fmt, io, mem, ptr, slice, str, u64};
 
 #[cfg(not(feature = "std"))]
-use core::{fmt, mem, ptr, slice, str};
+use core::{fmt, mem, ptr, slice, str, u64};
 
 /// Write integer to an `io::Write`.
 #[cfg(feature = "std")]
@@ -301,7 +301,7 @@ macro_rules! impl_Integer128 {
                 let lut_ptr = DEC_DIGITS_LUT.as_ptr();
 
                 unsafe {
-                    if n <= core::u64::MAX as u128 {
+                    if n <= u64::MAX as u128 {
                         let buf1 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [u8; U64_MAX_LEN];
                         curr -= (n as u64).write_to(&mut *buf1).len() as isize;
                     } else {
