@@ -59,7 +59,15 @@
 #![doc(html_root_url = "https://docs.rs/itoa/0.4.7")]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
-#![cfg_attr(feature = "cargo-clippy", allow(transmute_ptr_to_ptr))]
+#![cfg_attr(
+    feature = "cargo-clippy",
+    allow(
+        expl_impl_clone_on_copy,
+        missing_errors_doc,
+        must_use_candidate,
+        transmute_ptr_to_ptr
+    )
+)]
 
 #[cfg(feature = "i128")]
 mod udiv128;
