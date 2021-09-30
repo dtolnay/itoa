@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
 #![cfg_attr(
     feature = "cargo-clippy",
-    allow(cast_lossless, string_lit_as_bytes, unseparated_literal_suffix)
+    allow(cast_lossless, unseparated_literal_suffix)
 )]
 #![allow(non_snake_case)]
 
