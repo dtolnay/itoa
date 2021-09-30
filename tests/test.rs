@@ -1,4 +1,7 @@
-#![cfg_attr(feature = "cargo-clippy", allow(cast_lossless, string_lit_as_bytes))]
+#![cfg_attr(
+    feature = "cargo-clippy",
+    allow(cast_lossless, string_lit_as_bytes, unseparated_literal_suffix)
+)]
 #![allow(non_snake_case)]
 
 extern crate itoa;
