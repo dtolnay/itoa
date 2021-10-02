@@ -2,6 +2,7 @@
 name = "itoa"
 version = "0.4.8" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
+rust-version = "1.0"
 license = "MIT OR Apache-2.0"
 description = "Fast functions for printing integer primitives to an io::Write"
 repository = "https://github.com/dtolnay/itoa"
