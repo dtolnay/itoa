@@ -32,8 +32,7 @@ pub fn udivmod_1e19(n: u128) -> (u128, u64) {
     let quot = if n < 1 << 83 {
         ((n >> 19) as u64 / (d >> 19)) as u128
     } else {
-        let factor = (8507059173023461586_u64 as u128) << 64 | 10779635027931437427 as u128;
-        u128_mulhi(n, factor) >> 62
+        u128_mulhi(n, 156927543384667019095894735580191660403) >> 62
     };
 
     let rem = (n - quot * d as u128) as u64;
