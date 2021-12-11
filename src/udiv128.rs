@@ -12,7 +12,7 @@ fn u128_mulhi(x: u128, y: u128) -> u128 {
     let high1 = m >> 64;
 
     let m_lo = m as u64;
-    let high2 = x_hi as u128 * y_lo as u128 + m_lo as u128 >> 64;
+    let high2 = (x_hi as u128 * y_lo as u128 + m_lo as u128) >> 64;
 
     x_hi as u128 * y_hi as u128 + high1 + high2
 }
