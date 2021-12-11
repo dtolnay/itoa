@@ -158,7 +158,7 @@ trait IntegerPrivate<B> {
     fn write_to(self, buf: &mut B) -> &[u8];
 }
 
-const DEC_DIGITS_LUT: &'static [u8] = b"\
+const DEC_DIGITS_LUT: &[u8] = b"\
       0001020304050607080910111213141516171819\
       2021222324252627282930313233343536373839\
       4041424344454647484950515253545556575859\
