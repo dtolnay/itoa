@@ -1,6 +1,6 @@
-#![cfg_attr(feature = "cargo-clippy", allow(cast_lossless))]
 #![feature(test)]
 #![allow(non_snake_case)]
+#![allow(clippy::cast_lossless)]
 
 extern crate itoa;
 extern crate test;

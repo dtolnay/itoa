@@ -58,16 +58,12 @@
 
 #![doc(html_root_url = "https://docs.rs/itoa/0.4.8")]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
-#![cfg_attr(
-    feature = "cargo-clippy",
-    allow(
-        expl_impl_clone_on_copy,
-        missing_errors_doc,
-        must_use_candidate,
-        semicolon_if_nothing_returned, // https://github.com/rust-lang/rust-clippy/issues/7768
-        transmute_ptr_to_ptr
-    )
+#![allow(
+    clippy::expl_impl_clone_on_copy,
+    clippy::missing_errors_doc,
+    clippy::must_use_candidate,
+    clippy::semicolon_if_nothing_returned, // https://github.com/rust-lang/rust-clippy/issues/7768
+    clippy::transmute_ptr_to_ptr
 )]
 
 #[cfg(feature = "i128")]
