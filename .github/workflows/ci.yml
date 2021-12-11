@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.26.0]
+        rust: [nightly, beta, stable, 1.31.0]
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@master
@@ -27,22 +27,6 @@ jobs:
       - run: cargo test --tests --no-default-features --features i128 --release
       - run: cargo bench --no-run --features i128
         if: matrix.rust == 'nightly'
-
-  mintest:
-    name: Rust 1.20.0
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: dtolnay/rust-toolchain@1.20.0
-      - run: cargo test
-
-  msrv:
-    name: Rust 1.0.0
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: dtolnay/rust-toolchain@1.0.0
-      - run: cargo build
 
   miri:
     name: Miri

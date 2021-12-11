@@ -13,7 +13,7 @@ This crate provides fast functions for printing integer primitives to an
 
 See also [`dtoa`] for printing floating point primitives.
 
-*Version requirement: rustc 1.0+*
+*Version requirement: rustc 1.31+*
 
 [`io::Write`]: https://doc.rust-lang.org/std/io/trait.Write.html
 [`fmt::Write`]: https://doc.rust-lang.org/core/fmt/trait.Write.html
