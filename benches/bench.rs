@@ -76,8 +76,6 @@ benches! {
     bench_i16_0(0i16),
     bench_i16_min(<i16>::min_value()),
 
-    #[cfg(feature = "i128")]
     bench_u128_0(0u128),
-    #[cfg(feature = "i128")]
     bench_u128_max(<u128>::max_value())
 }

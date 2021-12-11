@@ -69,7 +69,6 @@
     clippy::unreadable_literal
 )]
 
-#[cfg(feature = "i128")]
 mod udiv128;
 
 #[cfg(feature = "std")]
@@ -289,7 +288,6 @@ impl_Integer!(I32_MAX_LEN => isize, U32_MAX_LEN => usize as u32);
 #[cfg(target_pointer_width = "64")]
 impl_Integer!(I64_MAX_LEN => isize, U64_MAX_LEN => usize as u64);
 
-#[cfg(all(feature = "i128"))]
 macro_rules! impl_Integer128 {
     ($($max_len:expr => $t:ident),*) => {$(
         impl_IntegerCommon!($max_len, $t);
@@ -351,9 +349,7 @@ macro_rules! impl_Integer128 {
     )*};
 }
 
-#[cfg(all(feature = "i128"))]
 const U128_MAX_LEN: usize = 39;
 const I128_MAX_LEN: usize = 40;
 
-#[cfg(all(feature = "i128"))]
 impl_Integer128!(I128_MAX_LEN => i128, U128_MAX_LEN => u128);

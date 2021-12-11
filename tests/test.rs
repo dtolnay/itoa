@@ -38,10 +38,7 @@ test! {
     test_i16_0(0i16, "0"),
     test_i16_min(<i16>::min_value(), "-32768"),
 
-    #[cfg(feature = "i128")]
     test_u128_0(0u128, "0"),
-    #[cfg(feature = "i128")]
     test_u128_max(<u128>::max_value(), "340282366920938463463374607431768211455"),
-    #[cfg(feature = "i128")]
     test_i128_min(<i128>::min_value(), "-170141183460469231731687303715884105728")
 }

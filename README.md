@@ -72,8 +72,7 @@ fn fmt<W: fmt::Write, V: itoa::Integer>(writer: W, value: V) -> fmt::Result;
 ```
 
 where `itoa::Integer` is implemented for i8, u8, i16, u16, i32, u32, i64, u64,
-i128, u128, isize and usize. 128-bit integer support requires rustc 1.26+ and
-the `i128` feature of this crate enabled.
+i128, u128, isize and usize.
 
 The `write` function is only available when the `std` feature is enabled
 (default is enabled). The return value gives the number of bytes written.

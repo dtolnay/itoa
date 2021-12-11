@@ -19,13 +19,12 @@ jobs:
         with:
           toolchain: ${{matrix.rust}}
       - run: cargo build
-      - run: cargo build --features i128
-      - run: cargo test --features i128
-      - run: cargo test --features i128 --release
-      - run: cargo build --no-default-features --features i128
-      - run: cargo test --tests --no-default-features --features i128
-      - run: cargo test --tests --no-default-features --features i128 --release
-      - run: cargo bench --no-run --features i128
+      - run: cargo test
+      - run: cargo test --release
+      - run: cargo build --no-default-features
+      - run: cargo test --tests --no-default-features
+      - run: cargo test --tests --no-default-features --release
+      - run: cargo bench --no-run
         if: matrix.rust == 'nightly'
 
   miri:
