@@ -39,7 +39,6 @@
     clippy::missing_errors_doc,
     clippy::must_use_candidate,
     clippy::semicolon_if_nothing_returned, // https://github.com/rust-lang/rust-clippy/issues/7768
-    clippy::transmute_ptr_to_ptr,
     clippy::unreadable_literal
 )]
 
@@ -89,10 +88,8 @@ impl Buffer {
     /// representation within the buffer.
     pub fn format<I: Integer>(&mut self, i: I) -> &str {
         i.write(unsafe {
-            mem::transmute::<
-                &mut [MaybeUninit<u8>; I128_MAX_LEN],
-                &mut <I as private::Sealed>::Buffer,
-            >(&mut self.bytes)
+            &mut *(&mut self.bytes as *mut [MaybeUninit<u8>; I128_MAX_LEN]
+                as *mut <I as private::Sealed>::Buffer)
         })
     }
 }
