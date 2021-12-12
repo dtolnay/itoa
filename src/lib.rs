@@ -58,7 +58,6 @@ use core::{ptr, slice, str};
 /// let printed = buffer.format(1234);
 /// assert_eq!(printed, "1234");
 /// ```
-#[derive(Copy)]
 pub struct Buffer {
     bytes: [MaybeUninit<u8>; I128_MAX_LEN],
 }
