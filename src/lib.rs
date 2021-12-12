@@ -92,18 +92,16 @@ impl Buffer {
     }
 }
 
-// Seal to prevent downstream implementations of the Integer trait.
-mod private {
-    pub trait Sealed {}
-}
-
 /// An integer that can be written into an [`itoa::Buffer`][Buffer].
 ///
 /// This trait is sealed and cannot be implemented for types outside of itoa.
-pub trait Integer: private::Sealed {
-    // Not public API.
-    #[doc(hidden)]
-    fn write(self, buf: &mut Buffer) -> &str;
+pub trait Integer: private::Sealed {}
+
+// Seal to prevent downstream implementations of the Integer trait.
+mod private {
+    pub trait Sealed {
+        fn write(self, buf: &mut crate::Buffer) -> &str;
+    }
 }
 
 trait IntegerPrivate<B> {
@@ -121,7 +119,9 @@ const DEC_DIGITS_LUT: &[u8] = b"\
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_IntegerCommon {
     ($max_len:expr, $t:ident) => {
-        impl Integer for $t {
+        impl Integer for $t {}
+
+        impl private::Sealed for $t {
             #[inline]
             fn write(self, buf: &mut Buffer) -> &str {
                 unsafe {
@@ -135,8 +135,6 @@ macro_rules! impl_IntegerCommon {
                 }
             }
         }
-
-        impl private::Sealed for $t {}
     };
 }
 
