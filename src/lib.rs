@@ -104,8 +104,9 @@ mod private {
     }
 }
 
-trait IntegerPrivate<B> {
-    fn write_to(self, buf: &mut B) -> &str;
+trait IntegerPrivate {
+    type Buffer;
+    fn write_to(self, buf: &mut Self::Buffer) -> &str;
 }
 
 const DEC_DIGITS_LUT: &[u8] = b"\
@@ -141,7 +142,9 @@ macro_rules! impl_Integer {
     ($($max_len:expr => $t:ident),* as $conv_fn:ident) => {$(
         impl_IntegerCommon!($max_len, $t);
 
-        impl IntegerPrivate<[MaybeUninit<u8>; $max_len]> for $t {
+        impl IntegerPrivate for $t {
+            type Buffer = [MaybeUninit<u8>; $max_len];
+
             #[allow(unused_comparisons)]
             #[inline]
             fn write_to(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
@@ -240,7 +243,9 @@ macro_rules! impl_Integer128 {
     ($($max_len:expr => $t:ident),*) => {$(
         impl_IntegerCommon!($max_len, $t);
 
-        impl IntegerPrivate<[MaybeUninit<u8>; $max_len]> for $t {
+        impl IntegerPrivate for $t {
+            type Buffer = [MaybeUninit<u8>; $max_len];
+
             #[allow(unused_comparisons)]
             #[inline]
             fn write_to(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
