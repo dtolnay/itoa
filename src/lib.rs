@@ -53,10 +53,10 @@
 mod udiv128;
 
 #[cfg(feature = "std")]
-use std::{fmt, io, mem, ptr, slice, str};
+use std::{io, mem, ptr, slice, str};
 
 #[cfg(not(feature = "std"))]
-use core::{fmt, mem, ptr, slice, str};
+use core::{mem, ptr, slice, str};
 
 use self::mem::MaybeUninit;
 
@@ -70,13 +70,6 @@ pub fn write<W: io::Write, V: Integer>(mut wr: W, value: V) -> io::Result<usize>
         Ok(()) => Ok(s.len()),
         Err(e) => Err(e),
     }
-}
-
-/// Write integer to an `fmt::Write`.
-#[inline]
-pub fn fmt<W: fmt::Write, V: Integer>(mut wr: W, value: V) -> fmt::Result {
-    let mut buf = Buffer::new();
-    wr.write_str(buf.format(value))
 }
 
 /// A safe API for formatting integers to text.
