@@ -6,6 +6,7 @@
 \definecolor{std}{HTML}{949494}
 \definecolor{bg}{HTML}{CFCFCF}
 \begin{document}
+\pagecolor{white}
 \begin{tikzpicture}
 \edef\entries{
   "$0${\enspace}as{\enspace}i16",
@@ -75,5 +76,8 @@
     (4, 24)
   };
 \end{axis}
+\pgfresetboundingbox\path
+  (current axis.south west) -- ++(-0.37in,-0.09in)
+  rectangle (current axis.north east) -- ++(0.05in,0.05in);
 \end{tikzpicture}
 \end{document}
