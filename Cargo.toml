@@ -12,9 +12,5 @@ readme = "README.md"
 exclude = ["performance.png"]
 edition = "2018"
 
-[features]
-default = ["std"]
-std = []
-
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

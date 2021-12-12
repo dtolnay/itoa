@@ -38,7 +38,7 @@
 //! ```
 
 #![doc(html_root_url = "https://docs.rs/itoa/0.4.8")]
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 #![allow(
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
@@ -52,13 +52,8 @@
 
 mod udiv128;
 
-#[cfg(feature = "std")]
-use std::{mem, ptr, slice, str};
-
-#[cfg(not(feature = "std"))]
-use core::{mem, ptr, slice, str};
-
-use self::mem::MaybeUninit;
+use core::mem::{self, MaybeUninit};
+use core::{ptr, slice, str};
 
 /// A safe API for formatting integers to text.
 ///
