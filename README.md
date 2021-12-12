@@ -10,13 +10,13 @@ This crate provides a fast conversion of integer primitives to decimal strings.
 The implementation comes straight from [libcore] but avoids the performance
 penalty of going through [`core::fmt::Formatter`].
 
-See also [`dtoa`] for printing floating point primitives.
+See also [`ryu`] for printing floating point primitives.
 
 *Version requirement: rustc 1.36+*
 
 [libcore]: https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L201-L254
 [`core::fmt::Formatter`]: https://doc.rust-lang.org/std/fmt/struct.Formatter.html
-[`dtoa`]: https://github.com/dtolnay/dtoa
+[`ryu`]: https://github.com/dtolnay/ryu
 
 ```toml
 [dependencies]
