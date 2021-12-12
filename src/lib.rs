@@ -105,7 +105,7 @@ mod private {
 }
 
 trait IntegerPrivate<B> {
-    fn write_to(self, buf: &mut B) -> &[u8];
+    fn write_to(self, buf: &mut B) -> &str;
 }
 
 const DEC_DIGITS_LUT: &[u8] = b"\
@@ -130,8 +130,7 @@ macro_rules! impl_IntegerCommon {
                         &mut [MaybeUninit<u8>; I128_MAX_LEN],
                         &mut [MaybeUninit<u8>; $max_len],
                     >(&mut buf.bytes);
-                    let bytes = self.write_to(buf);
-                    str::from_utf8_unchecked(bytes)
+                    self.write_to(buf)
                 }
             }
         }
@@ -145,7 +144,7 @@ macro_rules! impl_Integer {
         impl IntegerPrivate<[MaybeUninit<u8>; $max_len]> for $t {
             #[allow(unused_comparisons)]
             #[inline]
-            fn write_to(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &[u8] {
+            fn write_to(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
                 let is_nonnegative = self >= 0;
                 let mut n = if is_nonnegative {
                     self as $conv_fn
@@ -201,7 +200,8 @@ macro_rules! impl_Integer {
                 }
 
                 let len = buf.len() - curr as usize;
-                unsafe { slice::from_raw_parts(buf_ptr.offset(curr), len) }
+                let bytes = unsafe { slice::from_raw_parts(buf_ptr.offset(curr), len) };
+                unsafe { str::from_utf8_unchecked(bytes) }
             }
         }
     )*};
@@ -243,7 +243,7 @@ macro_rules! impl_Integer128 {
         impl IntegerPrivate<[MaybeUninit<u8>; $max_len]> for $t {
             #[allow(unused_comparisons)]
             #[inline]
-            fn write_to(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &[u8] {
+            fn write_to(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
                 let is_nonnegative = self >= 0;
                 let n = if is_nonnegative {
                     self as u128
@@ -290,7 +290,8 @@ macro_rules! impl_Integer128 {
                     }
 
                     let len = buf.len() - curr as usize;
-                    slice::from_raw_parts(buf_ptr.offset(curr), len)
+                    let bytes = slice::from_raw_parts(buf_ptr.offset(curr), len);
+                    str::from_utf8_unchecked(bytes)
                 }
             }
         }
