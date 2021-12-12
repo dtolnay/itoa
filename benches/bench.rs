@@ -5,16 +5,10 @@
 extern crate test;
 
 macro_rules! benches {
-    (
-        $(
-            $(#[$attr:meta])*
-            $name:ident($value:expr)
-        ),*
-    ) => {
+    ($($name:ident($value:expr)),*) => {
         mod bench_itoa_format {
             use test::{Bencher, black_box};
             $(
-                $(#[$attr])*
                 #[bench]
                 fn $name(b: &mut Bencher) {
                     let mut buffer = itoa::Buffer::new();
@@ -30,7 +24,6 @@ macro_rules! benches {
         mod bench_std_fmt {
             use test::{Bencher, black_box};
             $(
-                $(#[$attr])*
                 #[bench]
                 fn $name(b: &mut Bencher) {
                     use std::io::Write;

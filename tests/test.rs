@@ -2,14 +2,8 @@
 #![allow(clippy::cast_lossless, clippy::unseparated_literal_suffix)]
 
 macro_rules! test {
-    (
+    ($($name:ident($value:expr, $expected:expr)),*) => {
         $(
-            $(#[$attr:meta])*
-            $name:ident($value:expr, $expected:expr)
-        ),*
-    ) => {
-        $(
-            $(#[$attr])*
             #[test]
             fn $name() {
                 let mut buffer = itoa::Buffer::new();
