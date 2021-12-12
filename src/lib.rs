@@ -27,32 +27,13 @@
 //!
 //! <br>
 //!
-//! # Examples
+//! # Example
 //!
-//! ```edition2018
-//! use std::{fmt, io};
-//!
-//! fn demo_itoa_write() -> io::Result<()> {
-//!     // Write to a vector or other io::Write.
-//!     let mut buf = Vec::new();
-//!     itoa::write(&mut buf, 128u64)?;
-//!     println!("{:?}", buf);
-//!
-//!     // Write to a stack buffer.
-//!     let mut bytes = [0u8; 20];
-//!     let n = itoa::write(&mut bytes[..], 128u64)?;
-//!     println!("{:?}", &bytes[..n]);
-//!
-//!     Ok(())
-//! }
-//!
-//! fn demo_itoa_fmt() -> fmt::Result {
-//!     // Write to a string.
-//!     let mut s = String::new();
-//!     itoa::fmt(&mut s, 128u64)?;
-//!     println!("{}", s);
-//!
-//!     Ok(())
+//! ```
+//! fn main() {
+//!     let mut buffer = itoa::Buffer::new();
+//!     let printed = buffer.format(128u64);
+//!     assert_eq!(printed, "128");
 //! }
 //! ```
 
@@ -147,7 +128,7 @@ mod private {
     pub trait Sealed {}
 }
 
-/// An integer that can be formatted by `itoa::write` and `itoa::fmt`.
+/// An integer that can be written into an [`itoa::Buffer`][Buffer].
 ///
 /// This trait is sealed and cannot be implemented for types outside of itoa.
 pub trait Integer: private::Sealed {
