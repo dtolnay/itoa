@@ -12,15 +12,8 @@ macro_rules! test {
             $(#[$attr])*
             #[test]
             fn $name() {
-                #[cfg(feature = "std")]
-                {
-                    let mut buf = [b'\0'; 40];
-                    let len = itoa::write(&mut buf[..], $value).unwrap();
-                    assert_eq!(&buf[0..len], $expected.as_bytes());
-                }
-
-                let mut s = String::new();
-                itoa::fmt(&mut s, $value).unwrap();
+                let mut buffer = itoa::Buffer::new();
+                let s = buffer.format($value);
                 assert_eq!(s, $expected);
             }
         )*
