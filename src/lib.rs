@@ -35,10 +35,7 @@
 #![allow(
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
-    clippy::expl_impl_clone_on_copy,
-    clippy::missing_errors_doc,
     clippy::must_use_candidate,
-    clippy::semicolon_if_nothing_returned, // https://github.com/rust-lang/rust-clippy/issues/7768
     clippy::unreadable_literal
 )]
 

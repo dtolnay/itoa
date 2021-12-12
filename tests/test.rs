@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-#![allow(clippy::cast_lossless, clippy::unseparated_literal_suffix)]
+#![allow(clippy::cast_lossless)]
 
 macro_rules! test {
     ($($name:ident($value:expr, $expected:expr))*) => {
