@@ -20,7 +20,7 @@ See also [`ryu`] for printing floating point primitives.
 
 ```toml
 [dependencies]
-itoa = "0.4"
+itoa = "1.0"
 ```
 
 <br>
