@@ -5,9 +5,10 @@
 extern crate test;
 
 macro_rules! benches {
-    ($($name:ident($value:expr)),*) => {
+    ($($name:ident($value:expr))*) => {
         mod bench_itoa_format {
             use test::{Bencher, black_box};
+
             $(
                 #[bench]
                 fn $name(b: &mut Bencher) {
@@ -22,12 +23,12 @@ macro_rules! benches {
         }
 
         mod bench_std_fmt {
+            use std::io::Write;
             use test::{Bencher, black_box};
+
             $(
                 #[bench]
                 fn $name(b: &mut Bencher) {
-                    use std::io::Write;
-
                     let mut buf = Vec::with_capacity(40);
 
                     b.iter(|| {
@@ -42,13 +43,13 @@ macro_rules! benches {
 }
 
 benches! {
-    bench_u64_0(0u64),
-    bench_u64_half(<u32>::max_value() as u64),
-    bench_u64_max(<u64>::max_value()),
+    bench_u64_0(0u64)
+    bench_u64_half(u32::max_value() as u64)
+    bench_u64_max(u64::max_value())
 
-    bench_i16_0(0i16),
-    bench_i16_min(<i16>::min_value()),
+    bench_i16_0(0i16)
+    bench_i16_min(i16::min_value())
 
-    bench_u128_0(0u128),
-    bench_u128_max(<u128>::max_value())
+    bench_u128_0(0u128)
+    bench_u128_max(u128::max_value())
 }
