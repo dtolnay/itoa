@@ -2,7 +2,6 @@
 #![allow(non_snake_case)]
 #![allow(clippy::cast_lossless)]
 
-extern crate itoa;
 extern crate test;
 
 macro_rules! benches {
@@ -18,8 +17,6 @@ macro_rules! benches {
                 $(#[$attr])*
                 #[bench]
                 fn $name(b: &mut Bencher) {
-                    use itoa;
-
                     let mut buf = Vec::with_capacity(40);
 
                     b.iter(|| {
@@ -36,8 +33,6 @@ macro_rules! benches {
                 $(#[$attr])*
                 #[bench]
                 fn $name(b: &mut Bencher) {
-                    use itoa;
-
                     let mut buf = String::with_capacity(40);
 
                     b.iter(|| {

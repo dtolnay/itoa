@@ -1,8 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(clippy::cast_lossless, clippy::unseparated_literal_suffix)]
 
-extern crate itoa;
-
 macro_rules! test {
     (
         $(
