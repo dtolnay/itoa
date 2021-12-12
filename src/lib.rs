@@ -101,12 +101,10 @@ pub trait Integer: private::Sealed {}
 mod private {
     pub trait Sealed: Copy {
         fn write(self, buf: &mut crate::Buffer) -> &str;
-    }
-}
 
-trait IntegerPrivate {
-    type Buffer;
-    fn write_to(self, buf: &mut Self::Buffer) -> &str;
+        type Buffer;
+        fn write2(self, buf: &mut Self::Buffer) -> &str;
+    }
 }
 
 const DEC_DIGITS_LUT: &[u8] = b"\
@@ -131,17 +129,15 @@ macro_rules! impl_Integer {
                         &mut [MaybeUninit<u8>; I128_MAX_LEN],
                         &mut [MaybeUninit<u8>; $max_len],
                     >(&mut buf.bytes);
-                    self.write_to(buf)
+                    self.write2(buf)
                 }
             }
-        }
 
-        impl IntegerPrivate for $t {
             type Buffer = [MaybeUninit<u8>; $max_len];
 
             #[allow(unused_comparisons)]
             #[inline]
-            fn write_to(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
+            fn write2(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
                 let is_nonnegative = self >= 0;
                 let mut n = if is_nonnegative {
                     self as $conv_fn
@@ -246,17 +242,15 @@ macro_rules! impl_Integer128 {
                         &mut [MaybeUninit<u8>; I128_MAX_LEN],
                         &mut [MaybeUninit<u8>; $max_len],
                     >(&mut buf.bytes);
-                    self.write_to(buf)
+                    self.write2(buf)
                 }
             }
-        }
 
-        impl IntegerPrivate for $t {
             type Buffer = [MaybeUninit<u8>; $max_len];
 
             #[allow(unused_comparisons)]
             #[inline]
-            fn write_to(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
+            fn write2(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
                 let is_nonnegative = self >= 0;
                 let n = if is_nonnegative {
                     self as u128
@@ -271,7 +265,7 @@ macro_rules! impl_Integer128 {
                     // Divide by 10^19 which is the highest power less than 2^64.
                     let (n, rem) = udiv128::udivmod_1e19(n);
                     let buf1 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN];
-                    curr -= rem.write_to(&mut *buf1).len() as isize;
+                    curr -= rem.write2(&mut *buf1).len() as isize;
 
                     if n != 0 {
                         // Memset the base10 leading zeros of rem.
@@ -282,7 +276,7 @@ macro_rules! impl_Integer128 {
                         // Divide by 10^19 again.
                         let (n, rem) = udiv128::udivmod_1e19(n);
                         let buf2 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN];
-                        curr -= rem.write_to(&mut *buf2).len() as isize;
+                        curr -= rem.write2(&mut *buf2).len() as isize;
 
                         if n != 0 {
                             // Memset the leading zeros.
