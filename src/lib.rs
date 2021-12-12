@@ -88,7 +88,12 @@ impl Buffer {
     /// Print an integer into this buffer and return a reference to its string
     /// representation within the buffer.
     pub fn format<I: Integer>(&mut self, i: I) -> &str {
-        i.write(self)
+        i.write(unsafe {
+            mem::transmute::<
+                &mut [MaybeUninit<u8>; I128_MAX_LEN],
+                &mut <I as private::Sealed>::Buffer,
+            >(&mut self.bytes)
+        })
     }
 }
 
@@ -100,10 +105,8 @@ pub trait Integer: private::Sealed {}
 // Seal to prevent downstream implementations of the Integer trait.
 mod private {
     pub trait Sealed: Copy {
-        fn write(self, buf: &mut crate::Buffer) -> &str;
-
-        type Buffer;
-        fn write2(self, buf: &mut Self::Buffer) -> &str;
+        type Buffer: 'static;
+        fn write(self, buf: &mut Self::Buffer) -> &str;
     }
 }
 
@@ -121,23 +124,11 @@ macro_rules! impl_Integer {
         impl Integer for $t {}
 
         impl private::Sealed for $t {
-            #[inline]
-            fn write(self, buf: &mut Buffer) -> &str {
-                unsafe {
-                    debug_assert!($max_len <= I128_MAX_LEN);
-                    let buf = mem::transmute::<
-                        &mut [MaybeUninit<u8>; I128_MAX_LEN],
-                        &mut [MaybeUninit<u8>; $max_len],
-                    >(&mut buf.bytes);
-                    self.write2(buf)
-                }
-            }
-
             type Buffer = [MaybeUninit<u8>; $max_len];
 
             #[allow(unused_comparisons)]
             #[inline]
-            fn write2(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
+            fn write(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
                 let is_nonnegative = self >= 0;
                 let mut n = if is_nonnegative {
                     self as $conv_fn
@@ -234,23 +225,11 @@ macro_rules! impl_Integer128 {
         impl Integer for $t {}
 
         impl private::Sealed for $t {
-            #[inline]
-            fn write(self, buf: &mut Buffer) -> &str {
-                unsafe {
-                    debug_assert!($max_len <= I128_MAX_LEN);
-                    let buf = mem::transmute::<
-                        &mut [MaybeUninit<u8>; I128_MAX_LEN],
-                        &mut [MaybeUninit<u8>; $max_len],
-                    >(&mut buf.bytes);
-                    self.write2(buf)
-                }
-            }
-
             type Buffer = [MaybeUninit<u8>; $max_len];
 
             #[allow(unused_comparisons)]
             #[inline]
-            fn write2(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
+            fn write(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
                 let is_nonnegative = self >= 0;
                 let n = if is_nonnegative {
                     self as u128
@@ -265,7 +244,7 @@ macro_rules! impl_Integer128 {
                     // Divide by 10^19 which is the highest power less than 2^64.
                     let (n, rem) = udiv128::udivmod_1e19(n);
                     let buf1 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN];
-                    curr -= rem.write2(&mut *buf1).len() as isize;
+                    curr -= rem.write(&mut *buf1).len() as isize;
 
                     if n != 0 {
                         // Memset the base10 leading zeros of rem.
@@ -276,7 +255,7 @@ macro_rules! impl_Integer128 {
                         // Divide by 10^19 again.
                         let (n, rem) = udiv128::udivmod_1e19(n);
                         let buf2 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN];
-                        curr -= rem.write2(&mut *buf2).len() as isize;
+                        curr -= rem.write(&mut *buf2).len() as isize;
 
                         if n != 0 {
                             // Memset the leading zeros.
