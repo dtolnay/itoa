@@ -48,7 +48,8 @@ mod udiv128;
 use core::mem::{self, MaybeUninit};
 use core::{ptr, slice, str};
 
-/// A safe API for formatting integers to text.
+/// A correctly sized stack allocation for the formatted integer to be written
+/// into.
 ///
 /// # Example
 ///
@@ -85,8 +86,8 @@ impl Buffer {
         Buffer { bytes }
     }
 
-    /// Print an integer into this buffer and return a reference to its string representation
-    /// within the buffer.
+    /// Print an integer into this buffer and return a reference to its string
+    /// representation within the buffer.
     pub fn format<I: Integer>(&mut self, i: I) -> &str {
         i.write(self)
     }
