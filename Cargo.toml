@@ -9,7 +9,7 @@ repository = "https://github.com/dtolnay/itoa"
 documentation = "https://docs.rs/itoa"
 categories = ["value-formatting"]
 readme = "README.md"
-exclude = ["performance.png"]
+exclude = ["performance.png", "chart/**"]
 edition = "2018"
 
 [package.metadata.docs.rs]
