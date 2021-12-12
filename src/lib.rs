@@ -118,8 +118,8 @@ const DEC_DIGITS_LUT: &[u8] = b"\
 
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
-macro_rules! impl_IntegerCommon {
-    ($max_len:expr, $t:ident) => {
+macro_rules! impl_Integer {
+    ($($max_len:expr => $t:ident),* as $conv_fn:ident) => {$(
         impl Integer for $t {}
 
         impl private::Sealed for $t {
@@ -135,12 +135,6 @@ macro_rules! impl_IntegerCommon {
                 }
             }
         }
-    };
-}
-
-macro_rules! impl_Integer {
-    ($($max_len:expr => $t:ident),* as $conv_fn:ident) => {$(
-        impl_IntegerCommon!($max_len, $t);
 
         impl IntegerPrivate for $t {
             type Buffer = [MaybeUninit<u8>; $max_len];
@@ -241,7 +235,21 @@ impl_Integer!(I64_MAX_LEN => isize, U64_MAX_LEN => usize as u64);
 
 macro_rules! impl_Integer128 {
     ($($max_len:expr => $t:ident),*) => {$(
-        impl_IntegerCommon!($max_len, $t);
+        impl Integer for $t {}
+
+        impl private::Sealed for $t {
+            #[inline]
+            fn write(self, buf: &mut Buffer) -> &str {
+                unsafe {
+                    debug_assert!($max_len <= I128_MAX_LEN);
+                    let buf = mem::transmute::<
+                        &mut [MaybeUninit<u8>; I128_MAX_LEN],
+                        &mut [MaybeUninit<u8>; $max_len],
+                    >(&mut buf.bytes);
+                    self.write_to(buf)
+                }
+            }
+        }
 
         impl IntegerPrivate for $t {
             type Buffer = [MaybeUninit<u8>; $max_len];
