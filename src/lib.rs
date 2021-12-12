@@ -6,26 +6,15 @@
 //!
 //! <br>
 //!
-//! This crate provides fast functions for printing integer primitives to an
-//! [`io::Write`] or a [`fmt::Write`]. The implementation comes straight from
-//! [libcore] but avoids the performance penalty of going through
-//! [`fmt::Formatter`].
+//! This crate provides a fast conversion of integer primitives to decimal
+//! strings. The implementation comes straight from [libcore] but avoids the
+//! performance penalty of going through [`core::fmt::Formatter`].
 //!
 //! See also [`dtoa`] for printing floating point primitives.
 //!
-//! [`io::Write`]: https://doc.rust-lang.org/std/io/trait.Write.html
-//! [`fmt::Write`]: https://doc.rust-lang.org/core/fmt/trait.Write.html
 //! [libcore]: https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L201-L254
-//! [`fmt::Formatter`]: https://doc.rust-lang.org/std/fmt/struct.Formatter.html
+//! [`core::fmt::Formatter`]: https://doc.rust-lang.org/std/fmt/struct.Formatter.html
 //! [`dtoa`]: https://github.com/dtolnay/dtoa
-//!
-//! <br>
-//!
-//! # Performance (lower is better)
-//!
-//! ![performance](https://raw.githubusercontent.com/dtolnay/itoa/master/performance.png)
-//!
-//! <br>
 //!
 //! # Example
 //!
@@ -36,6 +25,10 @@
 //!     assert_eq!(printed, "128");
 //! }
 //! ```
+//!
+//! # Performance (lower is better)
+//!
+//! ![performance](https://raw.githubusercontent.com/dtolnay/itoa/master/performance.png)
 
 #![doc(html_root_url = "https://docs.rs/itoa/0.4.8")]
 #![no_std]
