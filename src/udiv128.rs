@@ -1,6 +1,6 @@
 /// Multiply unsigned 128 bit integers, return upper 128 bits of the result
 #[inline]
-fn u128_mulhi(x: u128, y: u128) -> u128 {
+const fn u128_mulhi(x: u128, y: u128) -> u128 {
     let x_lo = x as u64;
     let x_hi = (x >> 64) as u64;
     let y_lo = y as u64;
@@ -26,7 +26,7 @@ fn u128_mulhi(x: u128, y: u128) -> u128 {
 ///   Implementation, 1994, pp. 61–72
 ///
 #[inline]
-pub fn udivmod_1e19(n: u128) -> (u128, u64) {
+pub const fn udivmod_1e19(n: u128) -> (u128, u64) {
     let d = 10_000_000_000_000_000_000_u64; // 10^19
 
     let quot = if n < 1 << 83 {
@@ -36,8 +36,8 @@ pub fn udivmod_1e19(n: u128) -> (u128, u64) {
     };
 
     let rem = (n - quot * d as u128) as u64;
-    debug_assert_eq!(quot, n / d as u128);
-    debug_assert_eq!(rem as u128, n % d as u128);
+    debug_assert!(quot == n / d as u128);
+    debug_assert!(rem as u128 == n % d as u128);
 
     (quot, rem)
 }

@@ -38,6 +38,12 @@
     clippy::must_use_candidate,
     clippy::unreadable_literal
 )]
+#![feature(const_ptr_offset)]
+#![feature(const_slice_from_raw_parts)]
+#![feature(const_mut_refs)]
+#![feature(const_intrinsic_copy)]
+#![feature(const_trait_impl)]
+#![feature(const_ptr_write)]
 
 mod udiv128;
 
@@ -76,25 +82,20 @@ impl Buffer {
     /// This is a cheap operation; you don't need to worry about reusing buffers
     /// for efficiency.
     #[inline]
-    pub fn new() -> Buffer {
+    pub const fn new() -> Buffer {
         let bytes = [MaybeUninit::<u8>::uninit(); I128_MAX_LEN];
         Buffer { bytes }
     }
 
     /// Print an integer into this buffer and return a reference to its string
     /// representation within the buffer.
-    pub fn format<I: Integer>(&mut self, i: I) -> &str {
+    pub const fn format<I: ~const private::Sealed>(&mut self, i: I) -> &str {
         i.write(unsafe {
             &mut *(&mut self.bytes as *mut [MaybeUninit<u8>; I128_MAX_LEN]
                 as *mut <I as private::Sealed>::Buffer)
         })
     }
 }
-
-/// An integer that can be written into an [`itoa::Buffer`][Buffer].
-///
-/// This trait is sealed and cannot be implemented for types outside of itoa.
-pub trait Integer: private::Sealed {}
 
 // Seal to prevent downstream implementations of the Integer trait.
 mod private {
@@ -115,9 +116,7 @@ const DEC_DIGITS_LUT: &[u8] = b"\
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
     ($($max_len:expr => $t:ident),* as $conv_fn:ident) => {$(
-        impl Integer for $t {}
-
-        impl private::Sealed for $t {
+        impl const private::Sealed for $t {
             type Buffer = [MaybeUninit<u8>; $max_len];
 
             #[allow(unused_comparisons)]
@@ -216,9 +215,7 @@ impl_Integer!(I64_MAX_LEN => isize, U64_MAX_LEN => usize as u64);
 
 macro_rules! impl_Integer128 {
     ($($max_len:expr => $t:ident),*) => {$(
-        impl Integer for $t {}
-
-        impl private::Sealed for $t {
+        impl const private::Sealed for $t {
             type Buffer = [MaybeUninit<u8>; $max_len];
 
             #[allow(unused_comparisons)]
