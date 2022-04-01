@@ -38,7 +38,6 @@
     clippy::must_use_candidate,
     clippy::unreadable_literal
 )]
-#![feature(const_ptr_offset)]
 #![feature(const_slice_from_raw_parts)]
 #![feature(const_mut_refs)]
 #![feature(const_intrinsic_copy)]
