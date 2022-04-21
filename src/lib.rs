@@ -191,7 +191,7 @@ const I16_MAX_LEN: usize = 6;
 const U16_MAX_LEN: usize = 5;
 const I32_MAX_LEN: usize = 11;
 const U32_MAX_LEN: usize = 10;
-const I64_MAX_LEN: usize = 20;
+const I64_MAX_LEN: usize = 21;
 const U64_MAX_LEN: usize = 20;
 
 impl_Integer!(
