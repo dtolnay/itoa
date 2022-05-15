@@ -2,6 +2,7 @@
 
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
+use std::mem;
 
 #[derive(Arbitrary, Debug)]
 enum IntegerInput {
@@ -21,7 +22,7 @@ enum IntegerInput {
 
 fuzz_target!(|input: IntegerInput| {
     let mut buffer = itoa::Buffer::new();
-    match input {
+    let string = match input {
         IntegerInput::I8(val) => buffer.format(val),
         IntegerInput::U8(val) => buffer.format(val),
         IntegerInput::I16(val) => buffer.format(val),
@@ -35,4 +36,5 @@ fuzz_target!(|input: IntegerInput| {
         IntegerInput::Isize(val) => buffer.format(val),
         IntegerInput::Usize(val) => buffer.format(val),
     };
+    assert!(string.len() <= mem::size_of::<itoa::Buffer>());
 });
