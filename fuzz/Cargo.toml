@@ -8,17 +8,13 @@ edition = "2018"
 cargo-fuzz = true
 
 [dependencies]
-libfuzzer-sys = { version="0.4", features=["arbitrary-derive"] }
-
-[dependencies.itoa]
-path = ".."
-
-# Prevent this from interfering with workspaces
-[workspace]
-members = ["."]
+itoa = { path = ".." }
+libfuzzer-sys = { version = "0.4", features = ["arbitrary-derive"] }
 
 [[bin]]
 name = "fuzz_itoa"
 path = "fuzz_targets/fuzz_itoa.rs"
 test = false
 doc = false
+
+[workspace]
