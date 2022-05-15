@@ -20,21 +20,32 @@ enum IntegerInput {
     Usize(usize),
 }
 
-fuzz_target!(|input: IntegerInput| {
-    let mut buffer = itoa::Buffer::new();
-    let string = match input {
-        IntegerInput::I8(val) => buffer.format(val),
-        IntegerInput::U8(val) => buffer.format(val),
-        IntegerInput::I16(val) => buffer.format(val),
-        IntegerInput::U16(val) => buffer.format(val),
-        IntegerInput::I32(val) => buffer.format(val),
-        IntegerInput::U32(val) => buffer.format(val),
-        IntegerInput::I64(val) => buffer.format(val),
-        IntegerInput::U64(val) => buffer.format(val),
-        IntegerInput::I128(val) => buffer.format(val),
-        IntegerInput::U128(val) => buffer.format(val),
-        IntegerInput::Isize(val) => buffer.format(val),
-        IntegerInput::Usize(val) => buffer.format(val),
+macro_rules! test_itoa {
+    ($val:expr) => {
+        match $val {
+            val => {
+                let mut buffer = itoa::Buffer::new();
+                let string = buffer.format(val);
+                assert!(string.len() <= mem::size_of::<itoa::Buffer>());
+                assert_eq!(val, string.parse().unwrap());
+            }
+        }
     };
-    assert!(string.len() <= mem::size_of::<itoa::Buffer>());
+}
+
+fuzz_target!(|input: IntegerInput| {
+    match input {
+        IntegerInput::I8(val) => test_itoa!(val),
+        IntegerInput::U8(val) => test_itoa!(val),
+        IntegerInput::I16(val) => test_itoa!(val),
+        IntegerInput::U16(val) => test_itoa!(val),
+        IntegerInput::I32(val) => test_itoa!(val),
+        IntegerInput::U32(val) => test_itoa!(val),
+        IntegerInput::I64(val) => test_itoa!(val),
+        IntegerInput::U64(val) => test_itoa!(val),
+        IntegerInput::I128(val) => test_itoa!(val),
+        IntegerInput::U128(val) => test_itoa!(val),
+        IntegerInput::Isize(val) => test_itoa!(val),
+        IntegerInput::Usize(val) => test_itoa!(val),
+    }
 });
