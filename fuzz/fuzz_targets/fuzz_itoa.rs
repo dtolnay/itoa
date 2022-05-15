@@ -13,10 +13,10 @@ enum IntegerInput {
     U32(u32),
     I64(i64),
     U64(u64),
-    ISIZE(isize),
-    USIZE(usize),
     I128(i128),
     U128(u128),
+    ISIZE(isize),
+    USIZE(usize),
 }
 
 fuzz_target!(|input: IntegerInput| {
@@ -30,9 +30,9 @@ fuzz_target!(|input: IntegerInput| {
         IntegerInput::U32(val) => buffer.format(val),
         IntegerInput::I64(val) => buffer.format(val),
         IntegerInput::U64(val) => buffer.format(val),
-        IntegerInput::ISIZE(val) => buffer.format(val),
-        IntegerInput::USIZE(val) => buffer.format(val),
         IntegerInput::I128(val) => buffer.format(val),
         IntegerInput::U128(val) => buffer.format(val),
+        IntegerInput::ISIZE(val) => buffer.format(val),
+        IntegerInput::USIZE(val) => buffer.format(val),
     };
 });
