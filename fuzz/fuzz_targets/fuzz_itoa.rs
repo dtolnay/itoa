@@ -19,27 +19,20 @@ enum IntegerInput {
     U128(u128),
 }
 
-#[derive(Arbitrary, Debug)]
-struct Inputs {
-    inputs: Vec<IntegerInput>,
-}
-
-fuzz_target!(|input: Inputs| {
+fuzz_target!(|input: IntegerInput| {
     let mut buffer = itoa::Buffer::new();
-    for input_integer in input.inputs {
-        match input_integer {
-            IntegerInput::I8(val) => buffer.format(val),
-            IntegerInput::U8(val) => buffer.format(val),
-            IntegerInput::I16(val) => buffer.format(val),
-            IntegerInput::U16(val) => buffer.format(val),
-            IntegerInput::I32(val) => buffer.format(val),
-            IntegerInput::U32(val) => buffer.format(val),
-            IntegerInput::I64(val) => buffer.format(val),
-            IntegerInput::U64(val) => buffer.format(val),
-            IntegerInput::ISIZE(val) => buffer.format(val),
-            IntegerInput::USIZE(val) => buffer.format(val),
-            IntegerInput::I128(val) => buffer.format(val),
-            IntegerInput::U128(val) => buffer.format(val),
-        };
-    }
+    match input {
+        IntegerInput::I8(val) => buffer.format(val),
+        IntegerInput::U8(val) => buffer.format(val),
+        IntegerInput::I16(val) => buffer.format(val),
+        IntegerInput::U16(val) => buffer.format(val),
+        IntegerInput::I32(val) => buffer.format(val),
+        IntegerInput::U32(val) => buffer.format(val),
+        IntegerInput::I64(val) => buffer.format(val),
+        IntegerInput::U64(val) => buffer.format(val),
+        IntegerInput::ISIZE(val) => buffer.format(val),
+        IntegerInput::USIZE(val) => buffer.format(val),
+        IntegerInput::I128(val) => buffer.format(val),
+        IntegerInput::U128(val) => buffer.format(val),
+    };
 });
