@@ -3,7 +3,7 @@
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 
-#[derive(Arbitrary, Debug, Clone)]
+#[derive(Arbitrary, Debug)]
 enum IntegerInput {
     I8(i8),
     U8(u8),
@@ -19,7 +19,7 @@ enum IntegerInput {
     U128(u128),
 }
 
-#[derive(Arbitrary, Debug, Clone)]
+#[derive(Arbitrary, Debug)]
 struct Inputs {
     inputs: Vec<IntegerInput>,
 }
