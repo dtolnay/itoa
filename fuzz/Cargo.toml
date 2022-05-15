@@ -8,8 +8,9 @@ edition = "2018"
 cargo-fuzz = true
 
 [dependencies]
+arbitrary = { version = "1", features = ["derive"] }
 itoa = { path = ".." }
-libfuzzer-sys = { version = "0.4", features = ["arbitrary-derive"] }
+libfuzzer-sys = "0.4"
 
 [[bin]]
 name = "fuzz_itoa"
