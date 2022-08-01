@@ -2,7 +2,7 @@
 name = "itoa"
 version = "1.0.2" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
-categories = ["value-formatting"]
+categories = ["value-formatting", "no-std"]
 description = "Fast integer primitive to string conversion"
 documentation = "https://docs.rs/itoa"
 edition = "2018"
