@@ -7,6 +7,7 @@ description = "Fast integer primitive to string conversion"
 documentation = "https://docs.rs/itoa"
 edition = "2018"
 exclude = ["performance.png", "chart/**"]
+keywords = ["integer"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/dtolnay/itoa"
