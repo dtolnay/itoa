@@ -9,7 +9,6 @@ edition = "2018"
 exclude = ["performance.png", "chart/**"]
 keywords = ["integer"]
 license = "MIT OR Apache-2.0"
-readme = "README.md"
 repository = "https://github.com/dtolnay/itoa"
 rust-version = "1.36"
 
