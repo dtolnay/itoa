@@ -282,3 +282,27 @@ const U128_MAX_LEN: usize = 39;
 const I128_MAX_LEN: usize = 40;
 
 impl_Integer128!(I128_MAX_LEN => i128, U128_MAX_LEN => u128);
+
+
+/// A helper macro for the implementation of itoa.
+/// 
+/// # Example
+/// ```rust
+///fn main() {
+///     let mut buffer = itoa::Buffer::new();
+///     let printed = buffer.format(128u64).to_owned();
+///     assert_eq!(printed, "128");
+///     
+///     // Equal to
+/// 
+///     let printed = itoa::itoa!(128u64);
+///     assert_eq!(printed, "128");
+/// }
+/// ```
+/// 
+/// ## Note
+/// Using the itoa! macro will return an owned String value instead of &str. 
+#[macro_export]
+macro_rules! itoa {
+    ($val:expr) => { itoa::Buffer::new().format($val).to_owned() };
+}
