@@ -12,5 +12,8 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/itoa"
 rust-version = "1.36"
 
+[dependencies]
+no-panic = { version = "0.1", optional = true }
+
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
