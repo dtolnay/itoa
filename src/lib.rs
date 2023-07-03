@@ -35,6 +35,7 @@
 #![allow(
     clippy::cast_lossless,
     clippy::cast_possible_truncation,
+    clippy::expl_impl_clone_on_copy,
     clippy::must_use_candidate,
     clippy::unreadable_literal
 )]
