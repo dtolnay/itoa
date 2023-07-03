@@ -67,6 +67,8 @@ impl Default for Buffer {
     }
 }
 
+impl Copy for Buffer {}
+
 impl Clone for Buffer {
     #[inline]
     fn clone(&self) -> Self {
