@@ -37,6 +37,7 @@
     clippy::cast_possible_truncation,
     clippy::expl_impl_clone_on_copy,
     clippy::must_use_candidate,
+    clippy::needless_doctest_main,
     clippy::unreadable_literal
 )]
 
