@@ -137,16 +137,16 @@ macro_rules! impl_Integer {
                 let mut n = if is_nonnegative {
                     self as $conv_fn
                 } else {
-                    // convert the negative num to positive by summing 1 to it's 2 complement
+                    // Convert negative number to positive by summing 1 to its two's complement.
                     (!(self as $conv_fn)).wrapping_add(1)
                 };
                 let mut curr = buf.len() as isize;
                 let buf_ptr = buf.as_mut_ptr() as *mut u8;
                 let lut_ptr = DEC_DIGITS_LUT.as_ptr();
 
-                // need at least 16 bits for the 4-characters-at-a-time to work.
+                // Need at least 16 bits for the 4-digits-at-a-time to work.
                 if mem::size_of::<$t>() >= 2 {
-                    // eagerly decode 4 characters at a time
+                    // Eagerly decode 4 digits at a time.
                     while n >= 10000 {
                         let rem = (n % 10000) as isize;
                         n /= 10000;
@@ -161,10 +161,10 @@ macro_rules! impl_Integer {
                     }
                 }
 
-                // if we reach here numbers are <= 9999, so at most 4 chars long
-                let mut n = n as isize; // possibly reduce 64bit math
+                // If we reach here, numbers are <=9999 so at most 4 digits long.
+                let mut n = n as isize; // Possibly reduce 64-bit math.
 
-                // decode 2 more chars, if > 2 chars
+                // Decode 2 more digits, if >2 digits.
                 if n >= 100 {
                     let d1 = (n % 100) << 1;
                     n /= 100;
@@ -174,7 +174,7 @@ macro_rules! impl_Integer {
                     }
                 }
 
-                // decode last 1 or 2 chars
+                // Decode last 1 or 2 digits.
                 if n < 10 {
                     curr -= 1;
                     unsafe {
@@ -247,7 +247,7 @@ macro_rules! impl_Integer128 {
                 let n = if is_nonnegative {
                     self as u128
                 } else {
-                    // convert the negative num to positive by summing 1 to it's 2 complement
+                    // Convert negative number to positive by summing 1 to its two's complement.
                     (!(self as u128)).wrapping_add(1)
                 };
                 let mut curr = buf.len() as isize;
@@ -280,7 +280,7 @@ macro_rules! impl_Integer128 {
                         curr = target;
 
                         // There is at most one digit left
-                        // because u128::max / 10^19 / 10^19 is 3.
+                        // because u128::MAX / 10^19 / 10^19 is 3.
                         curr -= 1;
                         unsafe {
                             *buf_ptr.offset(curr) = (n as u8) + b'0';
