@@ -144,45 +144,53 @@ macro_rules! impl_Integer {
                 let buf_ptr = buf.as_mut_ptr() as *mut u8;
                 let lut_ptr = DEC_DIGITS_LUT.as_ptr();
 
-                unsafe {
-                    // need at least 16 bits for the 4-characters-at-a-time to work.
-                    if mem::size_of::<$t>() >= 2 {
-                        // eagerly decode 4 characters at a time
-                        while n >= 10000 {
-                            let rem = (n % 10000) as isize;
-                            n /= 10000;
+                // need at least 16 bits for the 4-characters-at-a-time to work.
+                if mem::size_of::<$t>() >= 2 {
+                    // eagerly decode 4 characters at a time
+                    while n >= 10000 {
+                        let rem = (n % 10000) as isize;
+                        n /= 10000;
 
-                            let d1 = (rem / 100) << 1;
-                            let d2 = (rem % 100) << 1;
-                            curr -= 4;
+                        let d1 = (rem / 100) << 1;
+                        let d2 = (rem % 100) << 1;
+                        curr -= 4;
+                        unsafe {
                             ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
                             ptr::copy_nonoverlapping(lut_ptr.offset(d2), buf_ptr.offset(curr + 2), 2);
                         }
                     }
+                }
 
-                    // if we reach here numbers are <= 9999, so at most 4 chars long
-                    let mut n = n as isize; // possibly reduce 64bit math
+                // if we reach here numbers are <= 9999, so at most 4 chars long
+                let mut n = n as isize; // possibly reduce 64bit math
 
-                    // decode 2 more chars, if > 2 chars
-                    if n >= 100 {
-                        let d1 = (n % 100) << 1;
-                        n /= 100;
-                        curr -= 2;
+                // decode 2 more chars, if > 2 chars
+                if n >= 100 {
+                    let d1 = (n % 100) << 1;
+                    n /= 100;
+                    curr -= 2;
+                    unsafe {
                         ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
                     }
+                }
 
-                    // decode last 1 or 2 chars
-                    if n < 10 {
-                        curr -= 1;
+                // decode last 1 or 2 chars
+                if n < 10 {
+                    curr -= 1;
+                    unsafe {
                         *buf_ptr.offset(curr) = (n as u8) + b'0';
-                    } else {
-                        let d1 = n << 1;
-                        curr -= 2;
+                    }
+                } else {
+                    let d1 = n << 1;
+                    curr -= 2;
+                    unsafe {
                         ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
                     }
+                }
 
-                    if !is_nonnegative {
-                        curr -= 1;
+                if !is_nonnegative {
+                    curr -= 1;
+                    unsafe {
                         *buf_ptr.offset(curr) = b'-';
                     }
                 }
@@ -245,45 +253,51 @@ macro_rules! impl_Integer128 {
                 let mut curr = buf.len() as isize;
                 let buf_ptr = buf.as_mut_ptr() as *mut u8;
 
-                unsafe {
-                    // Divide by 10^19 which is the highest power less than 2^64.
+                // Divide by 10^19 which is the highest power less than 2^64.
+                let (n, rem) = udiv128::udivmod_1e19(n);
+                let buf1 = unsafe { buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN] };
+                curr -= rem.write(unsafe { &mut *buf1 }).len() as isize;
+
+                if n != 0 {
+                    // Memset the base10 leading zeros of rem.
+                    let target = buf.len() as isize - 19;
+                    unsafe {
+                        ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
+                    }
+                    curr = target;
+
+                    // Divide by 10^19 again.
                     let (n, rem) = udiv128::udivmod_1e19(n);
-                    let buf1 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN];
-                    curr -= rem.write(&mut *buf1).len() as isize;
+                    let buf2 = unsafe { buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN] };
+                    curr -= rem.write(unsafe { &mut *buf2 }).len() as isize;
 
                     if n != 0 {
-                        // Memset the base10 leading zeros of rem.
-                        let target = buf.len() as isize - 19;
-                        ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
+                        // Memset the leading zeros.
+                        let target = buf.len() as isize - 38;
+                        unsafe {
+                            ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
+                        }
                         curr = target;
 
-                        // Divide by 10^19 again.
-                        let (n, rem) = udiv128::udivmod_1e19(n);
-                        let buf2 = buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN];
-                        curr -= rem.write(&mut *buf2).len() as isize;
-
-                        if n != 0 {
-                            // Memset the leading zeros.
-                            let target = buf.len() as isize - 38;
-                            ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
-                            curr = target;
-
-                            // There is at most one digit left
-                            // because u128::max / 10^19 / 10^19 is 3.
-                            curr -= 1;
+                        // There is at most one digit left
+                        // because u128::max / 10^19 / 10^19 is 3.
+                        curr -= 1;
+                        unsafe {
                             *buf_ptr.offset(curr) = (n as u8) + b'0';
                         }
                     }
+                }
 
-                    if !is_nonnegative {
-                        curr -= 1;
+                if !is_nonnegative {
+                    curr -= 1;
+                    unsafe {
                         *buf_ptr.offset(curr) = b'-';
                     }
-
-                    let len = buf.len() - curr as usize;
-                    let bytes = slice::from_raw_parts(buf_ptr.offset(curr), len);
-                    str::from_utf8_unchecked(bytes)
                 }
+
+                let len = buf.len() - curr as usize;
+                let bytes = unsafe { slice::from_raw_parts(buf_ptr.offset(curr), len) };
+                unsafe { str::from_utf8_unchecked(bytes) }
             }
         }
     )*};
