@@ -28,3 +28,16 @@ test! {
     test_i128_min(i128::min_value(), "-170141183460469231731687303715884105728")
     test_i128_max(i128::max_value(), "170141183460469231731687303715884105727")
 }
+
+#[test]
+fn test_buffer_default() {
+    let mut buffer = itoa::Buffer::default();
+    assert_eq!(buffer.format(42), "42");
+}
+
+#[test]
+fn test_buffer_clone() {
+    let buffer = itoa::Buffer::new();
+    let mut buffer = buffer.clone();
+    assert_eq!(buffer.format(42), "42");
+}
