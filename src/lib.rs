@@ -134,7 +134,7 @@ static DEC_DIGITS_LUT: [u8; 200] = *b"\
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
-    ($($t:ty[$max_len:expr])* as $large_unsigned:ty) => {$(
+    ($t:ty[$max_len:expr] as $large_unsigned:ty) => {
         impl Integer for $t {
             const MAX_STR_LEN: usize = $max_len;
         }
@@ -213,7 +213,7 @@ macro_rules! impl_Integer {
                 unsafe { str::from_utf8_unchecked(bytes) }
             }
         }
-    )*};
+    };
 }
 
 const I8_MAX_LEN: usize = 4;
@@ -225,29 +225,33 @@ const U32_MAX_LEN: usize = 10;
 const I64_MAX_LEN: usize = 20;
 const U64_MAX_LEN: usize = 20;
 
-impl_Integer! {
-    i8[I8_MAX_LEN]
-    u8[U8_MAX_LEN]
-    i16[I16_MAX_LEN]
-    u16[U16_MAX_LEN]
-    i32[I32_MAX_LEN]
-    u32[U32_MAX_LEN]
-    as u32
-}
+impl_Integer!(i8[I8_MAX_LEN] as u32);
+impl_Integer!(u8[U8_MAX_LEN] as u32);
+impl_Integer!(i16[I16_MAX_LEN] as u32);
+impl_Integer!(u16[U16_MAX_LEN] as u32);
+impl_Integer!(i32[I32_MAX_LEN] as u32);
+impl_Integer!(u32[U32_MAX_LEN] as u32);
 
-impl_Integer!(i64[I64_MAX_LEN] u64[U64_MAX_LEN] as u64);
+impl_Integer!(i64[I64_MAX_LEN] as u64);
+impl_Integer!(u64[U64_MAX_LEN] as u64);
 
 #[cfg(target_pointer_width = "16")]
-impl_Integer!(isize[I16_MAX_LEN] usize[U16_MAX_LEN] as u16);
+impl_Integer!(isize[I16_MAX_LEN] as u16);
+#[cfg(target_pointer_width = "16")]
+impl_Integer!(usize[U16_MAX_LEN] as u16);
 
 #[cfg(target_pointer_width = "32")]
-impl_Integer!(isize[I32_MAX_LEN] usize[U32_MAX_LEN] as u32);
+impl_Integer!(isize[I32_MAX_LEN] as u32);
+#[cfg(target_pointer_width = "32")]
+impl_Integer!(usize[U32_MAX_LEN] as u32);
 
 #[cfg(target_pointer_width = "64")]
-impl_Integer!(isize[I64_MAX_LEN] usize[U64_MAX_LEN] as u64);
+impl_Integer!(isize[I64_MAX_LEN] as u64);
+#[cfg(target_pointer_width = "64")]
+impl_Integer!(usize[U64_MAX_LEN] as u64);
 
 macro_rules! impl_Integer128 {
-    ($($t:ty[$max_len:expr])*) => {$(
+    ($t:ty[$max_len:expr]) => {
         impl Integer for $t {
             const MAX_STR_LEN: usize = $max_len;
         }
@@ -271,7 +275,9 @@ macro_rules! impl_Integer128 {
 
                 // Divide by 10^19 which is the highest power less than 2^64.
                 let (n, rem) = udiv128::udivmod_1e19(n);
-                let buf1 = unsafe { buf_ptr.add(curr - U64_MAX_LEN) as *mut [MaybeUninit<u8>; U64_MAX_LEN] };
+                let buf1 = unsafe {
+                    buf_ptr.add(curr - U64_MAX_LEN) as *mut [MaybeUninit<u8>; U64_MAX_LEN]
+                };
                 curr -= rem.write(unsafe { &mut *buf1 }).len();
 
                 if n != 0 {
@@ -284,7 +290,9 @@ macro_rules! impl_Integer128 {
 
                     // Divide by 10^19 again.
                     let (n, rem) = udiv128::udivmod_1e19(n);
-                    let buf2 = unsafe { buf_ptr.add(curr - U64_MAX_LEN) as *mut [MaybeUninit<u8>; U64_MAX_LEN] };
+                    let buf2 = unsafe {
+                        buf_ptr.add(curr - U64_MAX_LEN) as *mut [MaybeUninit<u8>; U64_MAX_LEN]
+                    };
                     curr -= rem.write(unsafe { &mut *buf2 }).len();
 
                     if n != 0 {
@@ -316,10 +324,11 @@ macro_rules! impl_Integer128 {
                 unsafe { str::from_utf8_unchecked(bytes) }
             }
         }
-    )*};
+    };
 }
 
 const U128_MAX_LEN: usize = 39;
 const I128_MAX_LEN: usize = 40;
 
-impl_Integer128!(i128[I128_MAX_LEN] u128[U128_MAX_LEN]);
+impl_Integer128!(i128[I128_MAX_LEN]);
+impl_Integer128!(u128[U128_MAX_LEN]);
