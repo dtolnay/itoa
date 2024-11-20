@@ -235,20 +235,32 @@ impl_Integer!(u32[U32_MAX_LEN] as u32);
 impl_Integer!(i64[I64_MAX_LEN] as u64);
 impl_Integer!(u64[U64_MAX_LEN] as u64);
 
-#[cfg(target_pointer_width = "16")]
-impl_Integer!(isize[I16_MAX_LEN] as u16);
-#[cfg(target_pointer_width = "16")]
-impl_Integer!(usize[U16_MAX_LEN] as u16);
+macro_rules! impl_Integer_size {
+    ($t:ty as $primitive:ident #[cfg(target_pointer_width = $width:literal)]) => {
+        #[cfg(target_pointer_width = $width)]
+        impl Integer for $t {
+            const MAX_STR_LEN: usize = <$primitive as Integer>::MAX_STR_LEN;
+        }
 
-#[cfg(target_pointer_width = "32")]
-impl_Integer!(isize[I32_MAX_LEN] as u32);
-#[cfg(target_pointer_width = "32")]
-impl_Integer!(usize[U32_MAX_LEN] as u32);
+        #[cfg(target_pointer_width = $width)]
+        impl private::Sealed for $t {
+            type Buffer = <$primitive as private::Sealed>::Buffer;
 
-#[cfg(target_pointer_width = "64")]
-impl_Integer!(isize[I64_MAX_LEN] as u64);
-#[cfg(target_pointer_width = "64")]
-impl_Integer!(usize[U64_MAX_LEN] as u64);
+            #[inline]
+            #[cfg_attr(feature = "no-panic", no_panic)]
+            fn write(self, buf: &mut Self::Buffer) -> &str {
+                (self as $primitive).write(buf)
+            }
+        }
+    };
+}
+
+impl_Integer_size!(isize as i16 #[cfg(target_pointer_width = "16")]);
+impl_Integer_size!(usize as u16 #[cfg(target_pointer_width = "16")]);
+impl_Integer_size!(isize as i32 #[cfg(target_pointer_width = "32")]);
+impl_Integer_size!(usize as u32 #[cfg(target_pointer_width = "32")]);
+impl_Integer_size!(isize as i64 #[cfg(target_pointer_width = "64")]);
+impl_Integer_size!(usize as u64 #[cfg(target_pointer_width = "64")]);
 
 macro_rules! impl_Integer128 {
     ($t:ty[$max_len:expr]) => {
