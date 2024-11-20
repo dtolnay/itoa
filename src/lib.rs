@@ -46,7 +46,7 @@
 mod udiv128;
 
 use core::hint;
-use core::mem::{self, MaybeUninit};
+use core::mem::MaybeUninit;
 use core::{ptr, slice, str};
 #[cfg(feature = "no-panic")]
 use no_panic::no_panic;
@@ -157,20 +157,17 @@ macro_rules! impl_Integer {
                 let buf_ptr = buf.as_mut_ptr() as *mut u8;
                 let lut_ptr = DEC_DIGITS_LUT.as_ptr();
 
-                // Need at least 16 bits for the 4-digits-at-a-time to work.
-                if mem::size_of::<$t>() >= 2 {
-                    // Eagerly decode 4 digits at a time.
-                    while n >= 10000 {
-                        let rem = (n % 10000) as isize;
-                        n /= 10000;
+                // Eagerly decode 4 digits at a time.
+                while n >= 10000 {
+                    let rem = (n % 10000) as isize;
+                    n /= 10000;
 
-                        let d1 = (rem / 100) << 1;
-                        let d2 = (rem % 100) << 1;
-                        curr -= 4;
-                        unsafe {
-                            ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.add(curr), 2);
-                            ptr::copy_nonoverlapping(lut_ptr.offset(d2), buf_ptr.add(curr + 2), 2);
-                        }
+                    let d1 = (rem / 100) << 1;
+                    let d2 = (rem % 100) << 1;
+                    curr -= 4;
+                    unsafe {
+                        ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.add(curr), 2);
+                        ptr::copy_nonoverlapping(lut_ptr.offset(d2), buf_ptr.add(curr + 2), 2);
                     }
                 }
 
