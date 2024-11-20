@@ -110,7 +110,7 @@ impl Buffer {
 ///
 /// This trait is sealed and cannot be implemented for types outside of itoa.
 pub trait Integer: private::Sealed {
-    /// The maximum length of the formated str for this integer.
+    /// The maximum length of the formatted str for this integer.
     const MAX_STR_LEN: usize;
 }
 
