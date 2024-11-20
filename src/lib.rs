@@ -134,7 +134,7 @@ const DEC_DIGITS_LUT: &[u8] = b"\
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
-    ($($max_len:expr => $t:ty),* as $conv_fn:ty) => {$(
+    ($($max_len:expr => $t:ty),* as $large_unsigned:ty) => {$(
         impl Integer for $t {
             const MAX_STR_LEN: usize = $max_len;
         }
@@ -148,10 +148,10 @@ macro_rules! impl_Integer {
             fn write(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
                 let is_nonnegative = self >= 0;
                 let mut n = if is_nonnegative {
-                    self as $conv_fn
+                    self as $large_unsigned
                 } else {
                     // Convert negative number to positive by summing 1 to its two's complement.
-                    (!(self as $conv_fn)).wrapping_add(1)
+                    (!(self as $large_unsigned)).wrapping_add(1)
                 };
                 let mut curr = buf.len() as isize;
                 let buf_ptr = buf.as_mut_ptr() as *mut u8;
