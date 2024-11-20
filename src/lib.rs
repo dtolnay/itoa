@@ -134,7 +134,7 @@ const DEC_DIGITS_LUT: &[u8] = b"\
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
-    ($($max_len:expr => $t:ty),* as $large_unsigned:ty) => {$(
+    ($($t:ty[$max_len:expr])* as $large_unsigned:ty) => {$(
         impl Integer for $t {
             const MAX_STR_LEN: usize = $max_len;
         }
@@ -225,28 +225,29 @@ const U32_MAX_LEN: usize = 10;
 const I64_MAX_LEN: usize = 20;
 const U64_MAX_LEN: usize = 20;
 
-impl_Integer!(
-    I8_MAX_LEN => i8,
-    U8_MAX_LEN => u8,
-    I16_MAX_LEN => i16,
-    U16_MAX_LEN => u16,
-    I32_MAX_LEN => i32,
-    U32_MAX_LEN => u32
-    as u32);
+impl_Integer! {
+    i8[I8_MAX_LEN]
+    u8[U8_MAX_LEN]
+    i16[I16_MAX_LEN]
+    u16[U16_MAX_LEN]
+    i32[I32_MAX_LEN]
+    u32[U32_MAX_LEN]
+    as u32
+}
 
-impl_Integer!(I64_MAX_LEN => i64, U64_MAX_LEN => u64 as u64);
+impl_Integer!(i64[I64_MAX_LEN] u64[U64_MAX_LEN] as u64);
 
 #[cfg(target_pointer_width = "16")]
-impl_Integer!(I16_MAX_LEN => isize, U16_MAX_LEN => usize as u16);
+impl_Integer!(isize[I16_MAX_LEN] usize[U16_MAX_LEN] as u16);
 
 #[cfg(target_pointer_width = "32")]
-impl_Integer!(I32_MAX_LEN => isize, U32_MAX_LEN => usize as u32);
+impl_Integer!(isize[I32_MAX_LEN] usize[U32_MAX_LEN] as u32);
 
 #[cfg(target_pointer_width = "64")]
-impl_Integer!(I64_MAX_LEN => isize, U64_MAX_LEN => usize as u64);
+impl_Integer!(isize[I64_MAX_LEN] usize[U64_MAX_LEN] as u64);
 
 macro_rules! impl_Integer128 {
-    ($($max_len:expr => $t:ty),*) => {$(
+    ($($t:ty[$max_len:expr])*) => {$(
         impl Integer for $t {
             const MAX_STR_LEN: usize = $max_len;
         }
@@ -321,4 +322,4 @@ macro_rules! impl_Integer128 {
 const U128_MAX_LEN: usize = 39;
 const I128_MAX_LEN: usize = 40;
 
-impl_Integer128!(I128_MAX_LEN => i128, U128_MAX_LEN => u128);
+impl_Integer128!(i128[I128_MAX_LEN] u128[U128_MAX_LEN]);
