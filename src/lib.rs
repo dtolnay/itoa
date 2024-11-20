@@ -153,7 +153,7 @@ macro_rules! impl_Integer {
                     // Convert negative number to positive by summing 1 to its two's complement.
                     (!(self as $large_unsigned)).wrapping_add(1)
                 };
-                let mut curr = buf.len() as isize;
+                let mut curr = buf.len();
                 let buf_ptr = buf.as_mut_ptr() as *mut u8;
                 let lut_ptr = DEC_DIGITS_LUT.as_ptr();
 
@@ -168,8 +168,8 @@ macro_rules! impl_Integer {
                         let d2 = (rem % 100) << 1;
                         curr -= 4;
                         unsafe {
-                            ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
-                            ptr::copy_nonoverlapping(lut_ptr.offset(d2), buf_ptr.offset(curr + 2), 2);
+                            ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.add(curr), 2);
+                            ptr::copy_nonoverlapping(lut_ptr.offset(d2), buf_ptr.add(curr + 2), 2);
                         }
                     }
                 }
@@ -183,7 +183,7 @@ macro_rules! impl_Integer {
                     n /= 100;
                     curr -= 2;
                     unsafe {
-                        ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
+                        ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.add(curr), 2);
                     }
                 }
 
@@ -191,25 +191,25 @@ macro_rules! impl_Integer {
                 if n < 10 {
                     curr -= 1;
                     unsafe {
-                        *buf_ptr.offset(curr) = (n as u8) + b'0';
+                        *buf_ptr.add(curr) = (n as u8) + b'0';
                     }
                 } else {
                     let d1 = n << 1;
                     curr -= 2;
                     unsafe {
-                        ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.offset(curr), 2);
+                        ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.add(curr), 2);
                     }
                 }
 
                 if !is_nonnegative {
                     curr -= 1;
                     unsafe {
-                        *buf_ptr.offset(curr) = b'-';
+                        *buf_ptr.add(curr) = b'-';
                     }
                 }
 
-                let len = buf.len() - curr as usize;
-                let bytes = unsafe { slice::from_raw_parts(buf_ptr.offset(curr), len) };
+                let len = buf.len() - curr;
+                let bytes = unsafe { slice::from_raw_parts(buf_ptr.add(curr), len) };
                 unsafe { str::from_utf8_unchecked(bytes) }
             }
         }
@@ -266,32 +266,32 @@ macro_rules! impl_Integer128 {
                     // Convert negative number to positive by summing 1 to its two's complement.
                     (!(self as u128)).wrapping_add(1)
                 };
-                let mut curr = buf.len() as isize;
+                let mut curr = buf.len();
                 let buf_ptr = buf.as_mut_ptr() as *mut u8;
 
                 // Divide by 10^19 which is the highest power less than 2^64.
                 let (n, rem) = udiv128::udivmod_1e19(n);
-                let buf1 = unsafe { buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN] };
-                curr -= rem.write(unsafe { &mut *buf1 }).len() as isize;
+                let buf1 = unsafe { buf_ptr.add(curr - U64_MAX_LEN) as *mut [MaybeUninit<u8>; U64_MAX_LEN] };
+                curr -= rem.write(unsafe { &mut *buf1 }).len();
 
                 if n != 0 {
                     // Memset the base10 leading zeros of rem.
-                    let target = buf.len() as isize - 19;
+                    let target = buf.len() - 19;
                     unsafe {
-                        ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
+                        ptr::write_bytes(buf_ptr.add(target), b'0', curr - target);
                     }
                     curr = target;
 
                     // Divide by 10^19 again.
                     let (n, rem) = udiv128::udivmod_1e19(n);
-                    let buf2 = unsafe { buf_ptr.offset(curr - U64_MAX_LEN as isize) as *mut [MaybeUninit<u8>; U64_MAX_LEN] };
-                    curr -= rem.write(unsafe { &mut *buf2 }).len() as isize;
+                    let buf2 = unsafe { buf_ptr.add(curr - U64_MAX_LEN) as *mut [MaybeUninit<u8>; U64_MAX_LEN] };
+                    curr -= rem.write(unsafe { &mut *buf2 }).len();
 
                     if n != 0 {
                         // Memset the leading zeros.
-                        let target = buf.len() as isize - 38;
+                        let target = buf.len() - 38;
                         unsafe {
-                            ptr::write_bytes(buf_ptr.offset(target), b'0', (curr - target) as usize);
+                            ptr::write_bytes(buf_ptr.add(target), b'0', curr - target);
                         }
                         curr = target;
 
@@ -299,7 +299,7 @@ macro_rules! impl_Integer128 {
                         // because u128::MAX / 10^19 / 10^19 is 3.
                         curr -= 1;
                         unsafe {
-                            *buf_ptr.offset(curr) = (n as u8) + b'0';
+                            *buf_ptr.add(curr) = (n as u8) + b'0';
                         }
                     }
                 }
@@ -307,12 +307,12 @@ macro_rules! impl_Integer128 {
                 if !is_nonnegative {
                     curr -= 1;
                     unsafe {
-                        *buf_ptr.offset(curr) = b'-';
+                        *buf_ptr.add(curr) = b'-';
                     }
                 }
 
-                let len = buf.len() - curr as usize;
-                let bytes = unsafe { slice::from_raw_parts(buf_ptr.offset(curr), len) };
+                let len = buf.len() - curr;
+                let bytes = unsafe { slice::from_raw_parts(buf_ptr.add(curr), len) };
                 unsafe { str::from_utf8_unchecked(bytes) }
             }
         }
