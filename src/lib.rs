@@ -62,7 +62,7 @@ use no_panic::no_panic;
 /// assert_eq!(printed, "1234");
 /// ```
 pub struct Buffer {
-    bytes: [MaybeUninit<u8>; I128_MAX_LEN],
+    bytes: [MaybeUninit<u8>; i128::MAX_STR_LEN],
 }
 
 impl Default for Buffer {
@@ -88,7 +88,7 @@ impl Buffer {
     #[inline]
     #[cfg_attr(feature = "no-panic", no_panic)]
     pub fn new() -> Buffer {
-        let bytes = [MaybeUninit::<u8>::uninit(); I128_MAX_LEN];
+        let bytes = [MaybeUninit::<u8>::uninit(); i128::MAX_STR_LEN];
         Buffer { bytes }
     }
 
@@ -97,7 +97,7 @@ impl Buffer {
     #[cfg_attr(feature = "no-panic", no_panic)]
     pub fn format<I: Integer>(&mut self, i: I) -> &str {
         let string = i.write(unsafe {
-            &mut *(&mut self.bytes as *mut [MaybeUninit<u8>; I128_MAX_LEN]
+            &mut *(&mut self.bytes as *mut [MaybeUninit<u8>; i128::MAX_STR_LEN]
                 as *mut <I as private::Sealed>::Buffer)
         });
         if string.len() > I::MAX_STR_LEN {
@@ -134,7 +134,7 @@ static DEC_DIGITS_LUT: [u8; 200] = *b"\
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
-    ($t:ty[$max_len:expr] as $large_unsigned:ty) => {
+    ($t:ty[len = $max_len:expr] as $large_unsigned:ty) => {
         impl Integer for $t {
             const MAX_STR_LEN: usize = $max_len;
         }
@@ -216,24 +216,14 @@ macro_rules! impl_Integer {
     };
 }
 
-const I8_MAX_LEN: usize = 4;
-const U8_MAX_LEN: usize = 3;
-const I16_MAX_LEN: usize = 6;
-const U16_MAX_LEN: usize = 5;
-const I32_MAX_LEN: usize = 11;
-const U32_MAX_LEN: usize = 10;
-const I64_MAX_LEN: usize = 20;
-const U64_MAX_LEN: usize = 20;
-
-impl_Integer!(i8[I8_MAX_LEN] as u32);
-impl_Integer!(u8[U8_MAX_LEN] as u32);
-impl_Integer!(i16[I16_MAX_LEN] as u32);
-impl_Integer!(u16[U16_MAX_LEN] as u32);
-impl_Integer!(i32[I32_MAX_LEN] as u32);
-impl_Integer!(u32[U32_MAX_LEN] as u32);
-
-impl_Integer!(i64[I64_MAX_LEN] as u64);
-impl_Integer!(u64[U64_MAX_LEN] as u64);
+impl_Integer!(i8[len = 4] as u32);
+impl_Integer!(u8[len = 3] as u32);
+impl_Integer!(i16[len = 6] as u32);
+impl_Integer!(u16[len = 5] as u32);
+impl_Integer!(i32[len = 11] as u32);
+impl_Integer!(u32[len = 10] as u32);
+impl_Integer!(i64[len = 20] as u64);
+impl_Integer!(u64[len = 20] as u64);
 
 macro_rules! impl_Integer_size {
     ($t:ty as $primitive:ident #[cfg(target_pointer_width = $width:literal)]) => {
@@ -263,7 +253,7 @@ impl_Integer_size!(isize as i64 #[cfg(target_pointer_width = "64")]);
 impl_Integer_size!(usize as u64 #[cfg(target_pointer_width = "64")]);
 
 macro_rules! impl_Integer128 {
-    ($t:ty[$max_len:expr]) => {
+    ($t:ty[len = $max_len:expr]) => {
         impl Integer for $t {
             const MAX_STR_LEN: usize = $max_len;
         }
@@ -288,7 +278,7 @@ macro_rules! impl_Integer128 {
                 // Divide by 10^19 which is the highest power less than 2^64.
                 let (n, rem) = udiv128::udivmod_1e19(n);
                 let buf1 = unsafe {
-                    buf_ptr.add(curr - U64_MAX_LEN) as *mut [MaybeUninit<u8>; U64_MAX_LEN]
+                    buf_ptr.add(curr - u64::MAX_STR_LEN) as *mut [MaybeUninit<u8>; u64::MAX_STR_LEN]
                 };
                 curr -= rem.write(unsafe { &mut *buf1 }).len();
 
@@ -303,7 +293,8 @@ macro_rules! impl_Integer128 {
                     // Divide by 10^19 again.
                     let (n, rem) = udiv128::udivmod_1e19(n);
                     let buf2 = unsafe {
-                        buf_ptr.add(curr - U64_MAX_LEN) as *mut [MaybeUninit<u8>; U64_MAX_LEN]
+                        buf_ptr.add(curr - u64::MAX_STR_LEN)
+                            as *mut [MaybeUninit<u8>; u64::MAX_STR_LEN]
                     };
                     curr -= rem.write(unsafe { &mut *buf2 }).len();
 
@@ -339,8 +330,5 @@ macro_rules! impl_Integer128 {
     };
 }
 
-const U128_MAX_LEN: usize = 39;
-const I128_MAX_LEN: usize = 40;
-
-impl_Integer128!(i128[I128_MAX_LEN]);
-impl_Integer128!(u128[U128_MAX_LEN]);
+impl_Integer128!(i128[len = 40]);
+impl_Integer128!(u128[len = 39]);
