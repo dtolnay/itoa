@@ -159,28 +159,25 @@ macro_rules! impl_Integer {
 
                 // Render 4 digits at a time.
                 while n >= 10000 {
-                    let rem = (n % 10000) as isize;
+                    let rem = n % 10000;
                     n /= 10000;
 
-                    let d1 = (rem / 100) << 1;
-                    let d2 = (rem % 100) << 1;
+                    let d1 = ((rem / 100) << 1) as usize;
+                    let d2 = ((rem % 100) << 1) as usize;
                     curr -= 4;
                     unsafe {
-                        ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.add(curr), 2);
-                        ptr::copy_nonoverlapping(lut_ptr.offset(d2), buf_ptr.add(curr + 2), 2);
+                        ptr::copy_nonoverlapping(lut_ptr.add(d1), buf_ptr.add(curr), 2);
+                        ptr::copy_nonoverlapping(lut_ptr.add(d2), buf_ptr.add(curr + 2), 2);
                     }
                 }
 
-                // If we reach here, numbers are <=9999 so at most 4 digits long.
-                let mut n = n as isize; // Possibly reduce 64-bit math.
-
                 // Render 2 more digits, if >2 digits.
                 if n >= 100 {
-                    let d1 = (n % 100) << 1;
+                    let d1 = ((n % 100) << 1) as usize;
                     n /= 100;
                     curr -= 2;
                     unsafe {
-                        ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.add(curr), 2);
+                        ptr::copy_nonoverlapping(lut_ptr.add(d1), buf_ptr.add(curr), 2);
                     }
                 }
 
@@ -191,10 +188,10 @@ macro_rules! impl_Integer {
                         *buf_ptr.add(curr) = (n as u8) + b'0';
                     }
                 } else {
-                    let d1 = n << 1;
+                    let d1 = (n << 1) as usize;
                     curr -= 2;
                     unsafe {
-                        ptr::copy_nonoverlapping(lut_ptr.offset(d1), buf_ptr.add(curr), 2);
+                        ptr::copy_nonoverlapping(lut_ptr.add(d1), buf_ptr.add(curr), 2);
                     }
                 }
 
