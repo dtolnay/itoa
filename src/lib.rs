@@ -134,7 +134,7 @@ const DEC_DIGITS_LUT: &[u8] = b"\
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
-    ($($max_len:expr => $t:ident),* as $conv_fn:ident) => {$(
+    ($($max_len:expr => $t:ty),* as $conv_fn:ty) => {$(
         impl Integer for $t {
             const MAX_STR_LEN: usize = $max_len;
         }
@@ -246,7 +246,7 @@ impl_Integer!(I32_MAX_LEN => isize, U32_MAX_LEN => usize as u32);
 impl_Integer!(I64_MAX_LEN => isize, U64_MAX_LEN => usize as u64);
 
 macro_rules! impl_Integer128 {
-    ($($max_len:expr => $t:ident),*) => {$(
+    ($($max_len:expr => $t:ty),*) => {$(
         impl Integer for $t {
             const MAX_STR_LEN: usize = $max_len;
         }
