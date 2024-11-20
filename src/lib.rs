@@ -157,7 +157,7 @@ macro_rules! impl_Integer {
                 let buf_ptr = buf.as_mut_ptr() as *mut u8;
                 let lut_ptr = DEC_DIGITS_LUT.as_ptr();
 
-                // Eagerly decode 4 digits at a time.
+                // Render 4 digits at a time.
                 while n >= 10000 {
                     let rem = (n % 10000) as isize;
                     n /= 10000;
@@ -174,7 +174,7 @@ macro_rules! impl_Integer {
                 // If we reach here, numbers are <=9999 so at most 4 digits long.
                 let mut n = n as isize; // Possibly reduce 64-bit math.
 
-                // Decode 2 more digits, if >2 digits.
+                // Render 2 more digits, if >2 digits.
                 if n >= 100 {
                     let d1 = (n % 100) << 1;
                     n /= 100;
@@ -184,7 +184,7 @@ macro_rules! impl_Integer {
                     }
                 }
 
-                // Decode last 1 or 2 digits.
+                // Render last 1 or 2 digits.
                 if n < 10 {
                     curr -= 1;
                     unsafe {
