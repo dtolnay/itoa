@@ -118,7 +118,9 @@ pub trait Integer: private::Sealed {
 
 // Seal to prevent downstream implementations of the Integer trait.
 mod private {
+    #[doc(hidden)]
     pub trait Sealed: Copy {
+        #[doc(hidden)]
         type Buffer: 'static;
         fn write(self, buf: &mut Self::Buffer) -> &str;
     }
