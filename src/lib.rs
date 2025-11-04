@@ -172,7 +172,7 @@ macro_rules! impl_Integer {
                     }
                 }
 
-                // Render 2 more digits, if >2 digits.
+                // Render 2 more digits, if > 2 digits.
                 if n >= 100 {
                     let d1 = ((n % 100) << 1) as usize;
                     n /= 100;
