@@ -10,7 +10,7 @@ exclude = ["performance.png", "chart/**"]
 keywords = ["integer"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/itoa"
-rust-version = "1.51"
+rust-version = "1.68"
 
 [dependencies]
 no-panic = { version = "0.1", optional = true }
