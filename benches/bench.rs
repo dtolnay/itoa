@@ -44,12 +44,12 @@ macro_rules! benches {
 
 benches! {
     bench_u64_0(0u64)
-    bench_u64_half(u32::max_value() as u64)
-    bench_u64_max(u64::max_value())
+    bench_u64_half(u32::MAX as u64)
+    bench_u64_max(u64::MAX)
 
     bench_i16_0(0i16)
-    bench_i16_min(i16::min_value())
+    bench_i16_min(i16::MIN)
 
     bench_u128_0(0u128)
-    bench_u128_max(u128::max_value())
+    bench_u128_max(u128::MAX)
 }
