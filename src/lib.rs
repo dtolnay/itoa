@@ -96,8 +96,8 @@ impl Buffer {
     #[cfg_attr(feature = "no-panic", no_panic)]
     pub fn format<I: Integer>(&mut self, i: I) -> &str {
         let string = i.write(unsafe {
-            &mut *(&mut self.bytes as *mut [MaybeUninit<u8>; i128::MAX_STR_LEN]
-                as *mut <I as private::Sealed>::Buffer)
+            &mut *(&mut self.bytes as *mut [MaybeUninit<u8>; i128::MAX_STR_LEN])
+                .cast::<<I as private::Sealed>::Buffer>()
         });
         if string.len() > I::MAX_STR_LEN {
             unsafe { hint::unreachable_unchecked() };
@@ -155,7 +155,7 @@ macro_rules! impl_Integer {
                     (!(self as $large_unsigned)).wrapping_add(1)
                 };
                 let mut curr = buf.len();
-                let buf_ptr = buf.as_mut_ptr() as *mut u8;
+                let buf_ptr = buf.as_mut_ptr().cast::<u8>();
                 let lut_ptr = DEC_DIGITS_LUT.as_ptr();
 
                 // Render 4 digits at a time.
@@ -268,12 +268,14 @@ macro_rules! impl_Integer128 {
                     (!(self as u128)).wrapping_add(1)
                 };
                 let mut curr = buf.len();
-                let buf_ptr = buf.as_mut_ptr() as *mut u8;
+                let buf_ptr = buf.as_mut_ptr().cast::<u8>();
 
                 // Divide by 10^19 which is the highest power less than 2^64.
                 let (n, rem) = udiv128::udivmod_1e19(n);
                 let buf1 = unsafe {
-                    buf_ptr.add(curr - u64::MAX_STR_LEN) as *mut [MaybeUninit<u8>; u64::MAX_STR_LEN]
+                    buf_ptr
+                        .add(curr - u64::MAX_STR_LEN)
+                        .cast::<[MaybeUninit<u8>; u64::MAX_STR_LEN]>()
                 };
                 curr -= rem.write(unsafe { &mut *buf1 }).len();
 
@@ -288,8 +290,9 @@ macro_rules! impl_Integer128 {
                     // Divide by 10^19 again.
                     let (n, rem) = udiv128::udivmod_1e19(n);
                     let buf2 = unsafe {
-                        buf_ptr.add(curr - u64::MAX_STR_LEN)
-                            as *mut [MaybeUninit<u8>; u64::MAX_STR_LEN]
+                        buf_ptr
+                            .add(curr - u64::MAX_STR_LEN)
+                            .cast::<[MaybeUninit<u8>; u64::MAX_STR_LEN]>()
                     };
                     curr -= rem.write(unsafe { &mut *buf2 }).len();
 
