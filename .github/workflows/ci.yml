@@ -44,7 +44,7 @@ jobs:
         if: matrix.rust == 'nightly'
       - run: cargo bench --no-run
         if: matrix.rust == 'nightly'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: matrix.rust == 'nightly' && always()
         with:
           name: Cargo.lock
