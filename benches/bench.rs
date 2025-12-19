@@ -7,7 +7,8 @@ extern crate test;
 macro_rules! benches {
     ($($name:ident($value:expr))*) => {
         mod bench_itoa_format {
-            use test::{Bencher, black_box};
+            use std::hint;
+            use test::Bencher;
 
             $(
                 #[bench]
@@ -15,16 +16,17 @@ macro_rules! benches {
                     let mut buffer = itoa::Buffer::new();
 
                     b.iter(|| {
-                        let printed = buffer.format(black_box($value));
-                        black_box(printed);
+                        let printed = buffer.format(hint::black_box($value));
+                        hint::black_box(printed);
                     });
                 }
             )*
         }
 
         mod bench_std_fmt {
+            use std::hint;
             use std::io::Write;
-            use test::{Bencher, black_box};
+            use test::Bencher;
 
             $(
                 #[bench]
@@ -33,8 +35,8 @@ macro_rules! benches {
 
                     b.iter(|| {
                         buf.clear();
-                        write!(&mut buf, "{}", black_box($value)).unwrap();
-                        black_box(&buf);
+                        write!(&mut buf, "{}", hint::black_box($value)).unwrap();
+                        hint::black_box(&buf);
                     });
                 }
             )*
