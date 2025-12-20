@@ -132,18 +132,19 @@ const DEC_DIGITS_LUT: [u8; 200] = *b"\
 // Adaptation of the original implementation at
 // https://github.com/rust-lang/rust/blob/b8214dc6c6fc20d0a660fb5700dca9ebf51ebe89/src/libcore/fmt/num.rs#L188-L266
 macro_rules! impl_Integer {
-    ($t:ty[len = $max_len:expr] as $large_unsigned:ty) => {
+    ($t:ty as $large_unsigned:ty) => {
         impl Integer for $t {
-            const MAX_STR_LEN: usize = $max_len;
+            #[allow(unused_comparisons)]
+            const MAX_STR_LEN: usize = <$t>::MAX.ilog10() as usize + 1 + (<$t>::MIN < 0) as usize;
         }
 
         impl private::Sealed for $t {
-            type Buffer = [MaybeUninit<u8>; $max_len];
+            type Buffer = [MaybeUninit<u8>; Self::MAX_STR_LEN];
 
             #[allow(unused_comparisons)]
             #[inline]
             #[cfg_attr(feature = "no-panic", no_panic)]
-            fn write(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
+            fn write(self, buf: &mut Self::Buffer) -> &str {
                 let is_nonnegative = self >= 0;
                 let mut n = if is_nonnegative {
                     self as $large_unsigned
@@ -208,14 +209,14 @@ macro_rules! impl_Integer {
     };
 }
 
-impl_Integer!(i8[len = 4] as u32);
-impl_Integer!(u8[len = 3] as u32);
-impl_Integer!(i16[len = 6] as u32);
-impl_Integer!(u16[len = 5] as u32);
-impl_Integer!(i32[len = 11] as u32);
-impl_Integer!(u32[len = 10] as u32);
-impl_Integer!(i64[len = 20] as u64);
-impl_Integer!(u64[len = 20] as u64);
+impl_Integer!(i8 as u32);
+impl_Integer!(u8 as u32);
+impl_Integer!(i16 as u32);
+impl_Integer!(u16 as u32);
+impl_Integer!(i32 as u32);
+impl_Integer!(u32 as u32);
+impl_Integer!(i64 as u64);
+impl_Integer!(u64 as u64);
 
 macro_rules! impl_Integer_size {
     ($t:ty as $primitive:ident #[cfg(target_pointer_width = $width:literal)]) => {
@@ -245,18 +246,19 @@ impl_Integer_size!(isize as i64 #[cfg(target_pointer_width = "64")]);
 impl_Integer_size!(usize as u64 #[cfg(target_pointer_width = "64")]);
 
 macro_rules! impl_Integer128 {
-    ($t:ty[len = $max_len:expr]) => {
+    ($t:ty) => {
         impl Integer for $t {
-            const MAX_STR_LEN: usize = $max_len;
+            #[allow(unused_comparisons)]
+            const MAX_STR_LEN: usize = <$t>::MAX.ilog10() as usize + 1 + (<$t>::MIN < 0) as usize;
         }
 
         impl private::Sealed for $t {
-            type Buffer = [MaybeUninit<u8>; $max_len];
+            type Buffer = [MaybeUninit<u8>; Self::MAX_STR_LEN];
 
             #[allow(unused_comparisons)]
             #[inline]
             #[cfg_attr(feature = "no-panic", no_panic)]
-            fn write(self, buf: &mut [MaybeUninit<u8>; $max_len]) -> &str {
+            fn write(self, buf: &mut Self::Buffer) -> &str {
                 let is_nonnegative = self >= 0;
                 let n = if is_nonnegative {
                     self as u128
@@ -325,5 +327,5 @@ macro_rules! impl_Integer128 {
     };
 }
 
-impl_Integer128!(i128[len = 40]);
-impl_Integer128!(u128[len = 39]);
+impl_Integer128!(i128);
+impl_Integer128!(u128);
