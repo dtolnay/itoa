@@ -27,3 +27,19 @@ test! {
     test_i128_min(i128::MIN, "-170141183460469231731687303715884105728")
     test_i128_max(i128::MAX, "170141183460469231731687303715884105727")
 }
+
+#[test]
+fn test_max_str_len() {
+    use itoa::Integer as _;
+
+    assert_eq!(i8::MAX_STR_LEN, 4);
+    assert_eq!(u8::MAX_STR_LEN, 3);
+    assert_eq!(i16::MAX_STR_LEN, 6);
+    assert_eq!(u16::MAX_STR_LEN, 5);
+    assert_eq!(i32::MAX_STR_LEN, 11);
+    assert_eq!(u32::MAX_STR_LEN, 10);
+    assert_eq!(i64::MAX_STR_LEN, 20);
+    assert_eq!(u64::MAX_STR_LEN, 20);
+    assert_eq!(i128::MAX_STR_LEN, 40);
+    assert_eq!(u128::MAX_STR_LEN, 39);
+}
