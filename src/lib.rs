@@ -224,7 +224,7 @@ unsafe fn slice_buffer_to_str(buf: &[MaybeUninit<u8>], offset: usize) -> &str {
     let written = unsafe { buf.get_unchecked(offset..) };
     // SAFETY: (`assume_init_ref`) All buf content since offset is set.
     // SAFETY: (`from_utf8_unchecked`) Writes use ASCII from the lookup table exclusively.
-    unsafe { str::from_utf8_unchecked(written.assume_init_ref()) }
+    unsafe { str::from_utf8_unchecked(&*(written as *const [MaybeUninit<u8>] as *const [u8])) }
 }
 
 trait Unsigned: Integer {
