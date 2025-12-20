@@ -43,7 +43,7 @@
 mod u128_ext;
 
 use core::hint;
-use core::mem::MaybeUninit;
+use core::mem::{self, MaybeUninit};
 use core::ptr;
 use core::str;
 #[cfg(feature = "no-panic")]
@@ -243,7 +243,7 @@ macro_rules! impl_Unsigned {
 
                 // Format per four digits from the lookup table.
                 // Four digits need a 16-bit $Unsigned or wider.
-                while size_of::<Self>() > 1
+                while mem::size_of::<Self>() > 1
                     && remain
                         > 999
                             .try_into()
