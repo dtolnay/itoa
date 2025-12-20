@@ -36,6 +36,7 @@
     clippy::cast_sign_loss,
     clippy::expl_impl_clone_on_copy,
     clippy::identity_op,
+    clippy::items_after_statements,
     clippy::must_use_candidate,
     clippy::needless_doctest_main,
     clippy::unreadable_literal
