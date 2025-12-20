@@ -157,8 +157,11 @@ macro_rules! impl_Integer {
             #[inline]
             #[cfg_attr(feature = "no-panic", no_panic)]
             fn write(self, buf: &mut Self::Buffer) -> &str {
-                let (prefix, unsigned) = buf.split_last_chunk_mut().unwrap();
-                let mut offset = prefix.len() + Unsigned::fmt(self.unsigned_abs(), unsigned);
+                let mut offset = Self::MAX_STR_LEN - $Unsigned::MAX_STR_LEN;
+                offset += Unsigned::fmt(
+                    self.unsigned_abs(),
+                    (&mut buf[offset..]).try_into().unwrap(),
+                );
                 if self < 0 {
                     offset -= 1;
                     buf[offset].write(b'-');
