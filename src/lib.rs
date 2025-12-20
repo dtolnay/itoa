@@ -251,10 +251,14 @@ macro_rules! impl_Unsigned {
                 {
                     // SAFETY: All of the decimals fit in buf due to MAX_DEC_N
                     // and the while condition ensures at least 4 more decimals.
-                    unsafe { core::hint::assert_unchecked(offset >= 4) }
+                    if offset < 4 {
+                        unsafe { hint::unreachable_unchecked() };
+                    }
                     // SAFETY: The offset counts down from its initial buf.len()
                     // without underflow due to the previous precondition.
-                    unsafe { core::hint::assert_unchecked(offset <= buf.len()) }
+                    if offset > buf.len() {
+                        unsafe { hint::unreachable_unchecked() };
+                    }
                     offset -= 4;
 
                     // pull two pairs
@@ -275,10 +279,14 @@ macro_rules! impl_Unsigned {
                 if remain > 9 {
                     // SAFETY: All of the decimals fit in buf due to MAX_DEC_N
                     // and the if condition ensures at least 2 more decimals.
-                    unsafe { core::hint::assert_unchecked(offset >= 2) }
+                    if offset < 2 {
+                        unsafe { hint::unreachable_unchecked() };
+                    }
                     // SAFETY: The offset counts down from its initial buf.len()
                     // without underflow due to the previous precondition.
-                    unsafe { core::hint::assert_unchecked(offset <= buf.len()) }
+                    if offset > buf.len() {
+                        unsafe { hint::unreachable_unchecked() };
+                    }
                     offset -= 2;
 
                     let pair = (remain % 100) as usize;
@@ -291,10 +299,14 @@ macro_rules! impl_Unsigned {
                 if remain != 0 || self == 0 {
                     // SAFETY: All of the decimals fit in buf due to MAX_DEC_N
                     // and the if condition ensures (at least) 1 more decimals.
-                    unsafe { core::hint::assert_unchecked(offset >= 1) }
+                    if offset < 1 {
+                        unsafe { hint::unreachable_unchecked() };
+                    }
                     // SAFETY: The offset counts down from its initial buf.len()
                     // without underflow due to the previous precondition.
-                    unsafe { core::hint::assert_unchecked(offset <= buf.len()) }
+                    if offset > buf.len() {
+                        unsafe { hint::unreachable_unchecked() };
+                    }
                     offset -= 1;
 
                     // Either the compiler sees that remain < 10, or it prevents
@@ -349,10 +361,14 @@ impl Unsigned for u128 {
         while remain > 999 {
             // SAFETY: All of the decimals fit in buf due to u128::MAX_STR_LEN
             // and the while condition ensures at least 4 more decimals.
-            unsafe { core::hint::assert_unchecked(offset >= 4) }
+            if offset < 4 {
+                unsafe { hint::unreachable_unchecked() };
+            }
             // SAFETY: The offset counts down from its initial buf.len()
             // without underflow due to the previous precondition.
-            unsafe { core::hint::assert_unchecked(offset <= buf.len()) }
+            if offset > buf.len() {
+                unsafe { hint::unreachable_unchecked() };
+            }
             offset -= 4;
 
             // pull two pairs
@@ -370,10 +386,14 @@ impl Unsigned for u128 {
         if remain > 9 {
             // SAFETY: All of the decimals fit in buf due to u128::MAX_STR_LEN
             // and the if condition ensures at least 2 more decimals.
-            unsafe { core::hint::assert_unchecked(offset >= 2) }
+            if offset < 2 {
+                unsafe { hint::unreachable_unchecked() };
+            }
             // SAFETY: The offset counts down from its initial buf.len()
             // without underflow due to the previous precondition.
-            unsafe { core::hint::assert_unchecked(offset <= buf.len()) }
+            if offset > buf.len() {
+                unsafe { hint::unreachable_unchecked() };
+            }
             offset -= 2;
 
             let pair = (remain % 100) as usize;
@@ -386,10 +406,14 @@ impl Unsigned for u128 {
         if remain != 0 {
             // SAFETY: All of the decimals fit in buf due to u128::MAX_STR_LEN
             // and the if condition ensures (at least) 1 more decimals.
-            unsafe { core::hint::assert_unchecked(offset >= 1) }
+            if offset < 1 {
+                unsafe { hint::unreachable_unchecked() };
+            }
             // SAFETY: The offset counts down from its initial buf.len()
             // without underflow due to the previous precondition.
-            unsafe { core::hint::assert_unchecked(offset <= buf.len()) }
+            if offset > buf.len() {
+                unsafe { hint::unreachable_unchecked() };
+            }
             offset -= 1;
 
             // Either the compiler sees that remain < 10, or it prevents
