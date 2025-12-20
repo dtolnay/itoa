@@ -33,7 +33,6 @@
 #![no_std]
 #![allow(
     clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
     clippy::cast_sign_loss,
     clippy::expl_impl_clone_on_copy,
     clippy::must_use_candidate,
