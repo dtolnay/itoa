@@ -218,6 +218,7 @@ static DECIMAL_PAIRS: &[u8; 200] = b"\
 ///
 /// `buf` content starting from `offset` index MUST BE initialized and MUST BE
 /// ascii characters.
+#[cfg_attr(feature = "no-panic", no_panic)]
 unsafe fn slice_buffer_to_str(buf: &[MaybeUninit<u8>], offset: usize) -> &str {
     // SAFETY: `offset` is always included between 0 and `buf`'s length.
     let written = unsafe { buf.get_unchecked(offset..) };
@@ -233,6 +234,7 @@ trait Unsigned: Integer {
 macro_rules! impl_Unsigned {
     ($Unsigned:ident) => {
         impl Unsigned for $Unsigned {
+            #[cfg_attr(feature = "no-panic", no_panic)]
             fn fmt(self, buf: &mut Self::Buffer) -> usize {
                 // Count the number of bytes in buf that are not initialized.
                 let mut offset = buf.len();
@@ -314,6 +316,7 @@ impl_Unsigned!(u32);
 impl_Unsigned!(u64);
 
 impl Unsigned for u128 {
+    #[cfg_attr(feature = "no-panic", no_panic)]
     fn fmt(self, buf: &mut Self::Buffer) -> usize {
         // Optimize common-case zero, which would also need special treatment due to
         // its "leading" zero.
@@ -400,6 +403,7 @@ impl Unsigned for u128 {
 }
 
 // Encodes the 16 least-significant decimals of n into `buf[OFFSET..OFFSET + 16]`.
+#[cfg_attr(feature = "no-panic", no_panic)]
 fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
     // Consume the least-significant decimals from a working copy.
     let mut remain = n;
@@ -427,7 +431,7 @@ fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
 //   in Proc. of the SIGPLAN94 Conference on Programming Language Design and
 //   Implementation, 1994, pp. 61–72
 //
-#[inline]
+#[cfg_attr(feature = "no-panic", no_panic)]
 fn div_rem_1e16(n: u128) -> (u128, u64) {
     const D: u128 = 1_0000_0000_0000_0000;
     // The check inlines well with the caller flow.
