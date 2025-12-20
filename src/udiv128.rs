@@ -11,14 +11,14 @@ fn u128_mulhi(x: u128, y: u128) -> u128 {
     let y_hi = (y >> 64) as u64;
 
     // handle possibility of overflow
-    let carry = (x_lo as u128 * y_lo as u128) >> 64;
-    let m = x_lo as u128 * y_hi as u128 + carry;
+    let carry = (u128::from(x_lo) * u128::from(y_lo)) >> 64;
+    let m = u128::from(x_lo) * u128::from(y_hi) + carry;
     let high1 = m >> 64;
 
     let m_lo = m as u64;
-    let high2 = (x_hi as u128 * y_lo as u128 + m_lo as u128) >> 64;
+    let high2 = (u128::from(x_hi) * u128::from(y_lo) + u128::from(m_lo)) >> 64;
 
-    x_hi as u128 * y_hi as u128 + high1 + high2
+    u128::from(x_hi) * u128::from(y_hi) + high1 + high2
 }
 
 /// Divide `n` by 1e19 and return quotient and remainder
@@ -35,14 +35,14 @@ pub fn udivmod_1e19(n: u128) -> (u128, u64) {
     let d = 10_000_000_000_000_000_000_u64; // 10^19
 
     let quot = if n < 1 << 83 {
-        ((n >> 19) as u64 / (d >> 19)) as u128
+        u128::from((n >> 19) as u64 / (d >> 19))
     } else {
         u128_mulhi(n, 156927543384667019095894735580191660403) >> 62
     };
 
-    let rem = (n - quot * d as u128) as u64;
-    debug_assert_eq!(quot, n / d as u128);
-    debug_assert_eq!(rem as u128, n % d as u128);
+    let rem = (n - quot * u128::from(d)) as u64;
+    debug_assert_eq!(quot, n / u128::from(d));
+    debug_assert_eq!(u128::from(rem), n % u128::from(d));
 
     (quot, rem)
 }

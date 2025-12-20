@@ -1,5 +1,4 @@
 #![allow(non_snake_case)]
-#![allow(clippy::cast_lossless)]
 
 macro_rules! test {
     ($($name:ident($value:expr, $expected:expr))*) => {
@@ -16,7 +15,7 @@ macro_rules! test {
 
 test! {
     test_u64_0(0u64, "0")
-    test_u64_half(u32::MAX as u64, "4294967295")
+    test_u64_half(u64::from(u32::MAX), "4294967295")
     test_u64_max(u64::MAX, "18446744073709551615")
     test_i64_min(i64::MIN, "-9223372036854775808")
 

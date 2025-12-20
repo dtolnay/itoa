@@ -32,7 +32,6 @@
 #![doc(html_root_url = "https://docs.rs/itoa/1.0.15")]
 #![no_std]
 #![allow(
-    clippy::cast_lossless,
     clippy::cast_possible_truncation,
     clippy::cast_possible_wrap,
     clippy::cast_sign_loss,

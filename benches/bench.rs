@@ -1,5 +1,3 @@
-#![allow(clippy::cast_lossless)]
-
 use criterion::{criterion_group, criterion_main, Criterion};
 use std::fmt::Display;
 use std::hint;
@@ -29,7 +27,7 @@ fn do_bench(c: &mut Criterion, group_name: &str, int: impl itoa::Integer + Displ
 
 fn bench(c: &mut Criterion) {
     do_bench(c, "u64[0]", 0u64);
-    do_bench(c, "u64[half]", u32::MAX as u64);
+    do_bench(c, "u64[half]", u64::from(u32::MAX));
     do_bench(c, "u64[max]", u64::MAX);
 
     do_bench(c, "i16[0]", 0i16);
