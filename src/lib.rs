@@ -268,10 +268,12 @@ macro_rules! impl_Unsigned {
                     remain /= scale;
                     let pair1 = (quad / 100) as usize;
                     let pair2 = (quad % 100) as usize;
-                    buf[offset + 0].write(DECIMAL_PAIRS.0[pair1 * 2 + 0]);
-                    buf[offset + 1].write(DECIMAL_PAIRS.0[pair1 * 2 + 1]);
-                    buf[offset + 2].write(DECIMAL_PAIRS.0[pair2 * 2 + 0]);
-                    buf[offset + 3].write(DECIMAL_PAIRS.0[pair2 * 2 + 1]);
+                    unsafe {
+                        buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 0));
+                        buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 1));
+                        buf[offset + 2].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 0));
+                        buf[offset + 3].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 1));
+                    }
                 }
 
                 // Format per two digits from the lookup table.
@@ -280,8 +282,10 @@ macro_rules! impl_Unsigned {
 
                     let pair = (remain % 100) as usize;
                     remain /= 100;
-                    buf[offset + 0].write(DECIMAL_PAIRS.0[pair * 2 + 0]);
-                    buf[offset + 1].write(DECIMAL_PAIRS.0[pair * 2 + 1]);
+                    unsafe {
+                        buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair * 2 + 0));
+                        buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair * 2 + 1));
+                    }
                 }
 
                 // Format the last remaining digit, if any.
@@ -291,7 +295,9 @@ macro_rules! impl_Unsigned {
                     // Either the compiler sees that remain < 10, or it prevents
                     // a boundary check up next.
                     let last = (remain & 15) as usize;
-                    buf[offset].write(DECIMAL_PAIRS.0[last * 2 + 1]);
+                    unsafe {
+                        buf[offset].write(*DECIMAL_PAIRS.0.get_unchecked(last * 2 + 1));
+                    }
                     // not used: remain = 0;
                 }
 
@@ -345,10 +351,12 @@ impl Unsigned for u128 {
             remain /= 1_00_00;
             let pair1 = (quad / 100) as usize;
             let pair2 = (quad % 100) as usize;
-            buf[offset + 0].write(DECIMAL_PAIRS.0[pair1 * 2 + 0]);
-            buf[offset + 1].write(DECIMAL_PAIRS.0[pair1 * 2 + 1]);
-            buf[offset + 2].write(DECIMAL_PAIRS.0[pair2 * 2 + 0]);
-            buf[offset + 3].write(DECIMAL_PAIRS.0[pair2 * 2 + 1]);
+            unsafe {
+                buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 0));
+                buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 1));
+                buf[offset + 2].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 0));
+                buf[offset + 3].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 1));
+            }
         }
 
         // Format per two digits from the lookup table.
@@ -357,8 +365,10 @@ impl Unsigned for u128 {
 
             let pair = (remain % 100) as usize;
             remain /= 100;
-            buf[offset + 0].write(DECIMAL_PAIRS.0[pair * 2 + 0]);
-            buf[offset + 1].write(DECIMAL_PAIRS.0[pair * 2 + 1]);
+            unsafe {
+                buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair * 2 + 0));
+                buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair * 2 + 1));
+            }
         }
 
         // Format the last remaining digit, if any.
@@ -368,7 +378,9 @@ impl Unsigned for u128 {
             // Either the compiler sees that remain < 10, or it prevents
             // a boundary check up next.
             let last = (remain & 15) as usize;
-            buf[offset].write(DECIMAL_PAIRS.0[last * 2 + 1]);
+            unsafe {
+                buf[offset].write(*DECIMAL_PAIRS.0.get_unchecked(last * 2 + 1));
+            }
             // not used: remain = 0;
         }
         offset
@@ -388,10 +400,12 @@ fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
         remain /= 1_00_00;
         let pair1 = (quad / 100) as usize;
         let pair2 = (quad % 100) as usize;
-        buf[quad_index * 4 + OFFSET + 0].write(DECIMAL_PAIRS.0[pair1 * 2 + 0]);
-        buf[quad_index * 4 + OFFSET + 1].write(DECIMAL_PAIRS.0[pair1 * 2 + 1]);
-        buf[quad_index * 4 + OFFSET + 2].write(DECIMAL_PAIRS.0[pair2 * 2 + 0]);
-        buf[quad_index * 4 + OFFSET + 3].write(DECIMAL_PAIRS.0[pair2 * 2 + 1]);
+        unsafe {
+            buf[quad_index * 4 + OFFSET + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 0));
+            buf[quad_index * 4 + OFFSET + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 1));
+            buf[quad_index * 4 + OFFSET + 2].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 0));
+            buf[quad_index * 4 + OFFSET + 3].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 1));
+        }
     }
 }
 
