@@ -220,6 +220,15 @@ static DECIMAL_PAIRS: DecimalPairs = DecimalPairs(
        8081828384858687888990919293949596979899",
 );
 
+// Returns {value / 100, value % 100} correct for values of up to 4 digits.
+fn divmod100(value: u32) -> (u32, u32) {
+    debug_assert!(value < 10_000);
+    const EXP: u32 = 19; // 19 is faster or equal to 12 even for 3 digits.
+    const SIG: u32 = (1 << EXP) / 100 + 1;
+    let div = (value * SIG) >> EXP; // value / 100
+    (div, value - div * 100)
+}
+
 /// This function converts a slice of ascii characters into a `&str` starting
 /// from `offset`.
 ///
@@ -266,13 +275,16 @@ macro_rules! impl_Unsigned {
                         .expect("branch is not hit for types that cannot fit 1E4 (u8)");
                     let quad = remain % scale;
                     remain /= scale;
-                    let pair1 = (quad / 100) as usize;
-                    let pair2 = (quad % 100) as usize;
+                    let (pair1, pair2) = divmod100(quad as u32);
                     unsafe {
-                        buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 0));
-                        buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 1));
-                        buf[offset + 2].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 0));
-                        buf[offset + 3].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 1));
+                        buf[offset + 0]
+                            .write(*DECIMAL_PAIRS.0.get_unchecked(pair1 as usize * 2 + 0));
+                        buf[offset + 1]
+                            .write(*DECIMAL_PAIRS.0.get_unchecked(pair1 as usize * 2 + 1));
+                        buf[offset + 2]
+                            .write(*DECIMAL_PAIRS.0.get_unchecked(pair2 as usize * 2 + 0));
+                        buf[offset + 3]
+                            .write(*DECIMAL_PAIRS.0.get_unchecked(pair2 as usize * 2 + 1));
                     }
                 }
 
@@ -280,11 +292,13 @@ macro_rules! impl_Unsigned {
                 if remain > 9 {
                     offset -= 2;
 
-                    let pair = (remain % 100) as usize;
-                    remain /= 100;
+                    let (last, pair) = divmod100(remain as u32);
+                    remain = last as Self;
                     unsafe {
-                        buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair * 2 + 0));
-                        buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair * 2 + 1));
+                        buf[offset + 0]
+                            .write(*DECIMAL_PAIRS.0.get_unchecked(pair as usize * 2 + 0));
+                        buf[offset + 1]
+                            .write(*DECIMAL_PAIRS.0.get_unchecked(pair as usize * 2 + 1));
                     }
                 }
 
@@ -349,13 +363,12 @@ impl Unsigned for u128 {
             // pull two pairs
             let quad = remain % 1_00_00;
             remain /= 1_00_00;
-            let pair1 = (quad / 100) as usize;
-            let pair2 = (quad % 100) as usize;
+            let (pair1, pair2) = divmod100(quad as u32);
             unsafe {
-                buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 0));
-                buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 1));
-                buf[offset + 2].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 0));
-                buf[offset + 3].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 1));
+                buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 as usize * 2 + 0));
+                buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 as usize * 2 + 1));
+                buf[offset + 2].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 as usize * 2 + 0));
+                buf[offset + 3].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 as usize * 2 + 1));
             }
         }
 
@@ -363,11 +376,11 @@ impl Unsigned for u128 {
         if remain > 9 {
             offset -= 2;
 
-            let pair = (remain % 100) as usize;
-            remain /= 100;
+            let (last, pair) = divmod100(remain as u32);
+            remain = last as u64;
             unsafe {
-                buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair * 2 + 0));
-                buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair * 2 + 1));
+                buf[offset + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair as usize * 2 + 0));
+                buf[offset + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair as usize * 2 + 1));
             }
         }
 
@@ -398,13 +411,16 @@ fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
         // pull two pairs
         let quad = remain % 1_00_00;
         remain /= 1_00_00;
-        let pair1 = (quad / 100) as usize;
-        let pair2 = (quad % 100) as usize;
+        let (pair1, pair2) = divmod100(quad as u32);
         unsafe {
-            buf[quad_index * 4 + OFFSET + 0].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 0));
-            buf[quad_index * 4 + OFFSET + 1].write(*DECIMAL_PAIRS.0.get_unchecked(pair1 * 2 + 1));
-            buf[quad_index * 4 + OFFSET + 2].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 0));
-            buf[quad_index * 4 + OFFSET + 3].write(*DECIMAL_PAIRS.0.get_unchecked(pair2 * 2 + 1));
+            buf[quad_index * 4 + OFFSET + 0]
+                .write(*DECIMAL_PAIRS.0.get_unchecked(pair1 as usize * 2 + 0));
+            buf[quad_index * 4 + OFFSET + 1]
+                .write(*DECIMAL_PAIRS.0.get_unchecked(pair1 as usize * 2 + 1));
+            buf[quad_index * 4 + OFFSET + 2]
+                .write(*DECIMAL_PAIRS.0.get_unchecked(pair2 as usize * 2 + 0));
+            buf[quad_index * 4 + OFFSET + 3]
+                .write(*DECIMAL_PAIRS.0.get_unchecked(pair2 as usize * 2 + 1));
         }
     }
 }
