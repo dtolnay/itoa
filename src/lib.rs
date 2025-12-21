@@ -258,16 +258,6 @@ macro_rules! impl_Unsigned {
                             .try_into()
                             .expect("branch is not hit for types that cannot fit 999 (u8)")
                 {
-                    // SAFETY: All of the decimals fit in buf due to MAX_DEC_N
-                    // and the while condition ensures at least 4 more decimals.
-                    if offset < 4 {
-                        unsafe { hint::unreachable_unchecked() };
-                    }
-                    // SAFETY: The offset counts down from its initial buf.len()
-                    // without underflow due to the previous precondition.
-                    if offset > buf.len() {
-                        unsafe { hint::unreachable_unchecked() };
-                    }
                     offset -= 4;
 
                     // pull two pairs
@@ -286,16 +276,6 @@ macro_rules! impl_Unsigned {
 
                 // Format per two digits from the lookup table.
                 if remain > 9 {
-                    // SAFETY: All of the decimals fit in buf due to MAX_DEC_N
-                    // and the if condition ensures at least 2 more decimals.
-                    if offset < 2 {
-                        unsafe { hint::unreachable_unchecked() };
-                    }
-                    // SAFETY: The offset counts down from its initial buf.len()
-                    // without underflow due to the previous precondition.
-                    if offset > buf.len() {
-                        unsafe { hint::unreachable_unchecked() };
-                    }
                     offset -= 2;
 
                     let pair = (remain % 100) as usize;
@@ -306,16 +286,6 @@ macro_rules! impl_Unsigned {
 
                 // Format the last remaining digit, if any.
                 if remain != 0 || self == 0 {
-                    // SAFETY: All of the decimals fit in buf due to MAX_DEC_N
-                    // and the if condition ensures (at least) 1 more decimals.
-                    if offset < 1 {
-                        unsafe { hint::unreachable_unchecked() };
-                    }
-                    // SAFETY: The offset counts down from its initial buf.len()
-                    // without underflow due to the previous precondition.
-                    if offset > buf.len() {
-                        unsafe { hint::unreachable_unchecked() };
-                    }
                     offset -= 1;
 
                     // Either the compiler sees that remain < 10, or it prevents
@@ -368,16 +338,6 @@ impl Unsigned for u128 {
 
         // Format per four digits from the lookup table.
         while remain > 999 {
-            // SAFETY: All of the decimals fit in buf due to u128::MAX_STR_LEN
-            // and the while condition ensures at least 4 more decimals.
-            if offset < 4 {
-                unsafe { hint::unreachable_unchecked() };
-            }
-            // SAFETY: The offset counts down from its initial buf.len()
-            // without underflow due to the previous precondition.
-            if offset > buf.len() {
-                unsafe { hint::unreachable_unchecked() };
-            }
             offset -= 4;
 
             // pull two pairs
@@ -393,16 +353,6 @@ impl Unsigned for u128 {
 
         // Format per two digits from the lookup table.
         if remain > 9 {
-            // SAFETY: All of the decimals fit in buf due to u128::MAX_STR_LEN
-            // and the if condition ensures at least 2 more decimals.
-            if offset < 2 {
-                unsafe { hint::unreachable_unchecked() };
-            }
-            // SAFETY: The offset counts down from its initial buf.len()
-            // without underflow due to the previous precondition.
-            if offset > buf.len() {
-                unsafe { hint::unreachable_unchecked() };
-            }
             offset -= 2;
 
             let pair = (remain % 100) as usize;
@@ -413,16 +363,6 @@ impl Unsigned for u128 {
 
         // Format the last remaining digit, if any.
         if remain != 0 {
-            // SAFETY: All of the decimals fit in buf due to u128::MAX_STR_LEN
-            // and the if condition ensures (at least) 1 more decimals.
-            if offset < 1 {
-                unsafe { hint::unreachable_unchecked() };
-            }
-            // SAFETY: The offset counts down from its initial buf.len()
-            // without underflow due to the previous precondition.
-            if offset > buf.len() {
-                unsafe { hint::unreachable_unchecked() };
-            }
             offset -= 1;
 
             // Either the compiler sees that remain < 10, or it prevents
