@@ -208,13 +208,17 @@ impl_Integer_size!(usize as u32 #[cfg(target_pointer_width = "32")]);
 impl_Integer_size!(isize as i64 #[cfg(target_pointer_width = "64")]);
 impl_Integer_size!(usize as u64 #[cfg(target_pointer_width = "64")]);
 
+#[repr(align(2))]
+struct DecimalPairs([u8; 200]);
+
 // The string of all two-digit numbers in range 00..99 is used as a lookup table.
-static DECIMAL_PAIRS: &[u8; 200] = b"\
-      0001020304050607080910111213141516171819\
-      2021222324252627282930313233343536373839\
-      4041424344454647484950515253545556575859\
-      6061626364656667686970717273747576777879\
-      8081828384858687888990919293949596979899";
+static DECIMAL_PAIRS: DecimalPairs = DecimalPairs(
+    *b"0001020304050607080910111213141516171819\
+       2021222324252627282930313233343536373839\
+       4041424344454647484950515253545556575859\
+       6061626364656667686970717273747576777879\
+       8081828384858687888990919293949596979899",
+);
 
 /// This function converts a slice of ascii characters into a `&str` starting
 /// from `offset`.
@@ -274,10 +278,10 @@ macro_rules! impl_Unsigned {
                     remain /= scale;
                     let pair1 = (quad / 100) as usize;
                     let pair2 = (quad % 100) as usize;
-                    buf[offset + 0].write(DECIMAL_PAIRS[pair1 * 2 + 0]);
-                    buf[offset + 1].write(DECIMAL_PAIRS[pair1 * 2 + 1]);
-                    buf[offset + 2].write(DECIMAL_PAIRS[pair2 * 2 + 0]);
-                    buf[offset + 3].write(DECIMAL_PAIRS[pair2 * 2 + 1]);
+                    buf[offset + 0].write(DECIMAL_PAIRS.0[pair1 * 2 + 0]);
+                    buf[offset + 1].write(DECIMAL_PAIRS.0[pair1 * 2 + 1]);
+                    buf[offset + 2].write(DECIMAL_PAIRS.0[pair2 * 2 + 0]);
+                    buf[offset + 3].write(DECIMAL_PAIRS.0[pair2 * 2 + 1]);
                 }
 
                 // Format per two digits from the lookup table.
@@ -296,8 +300,8 @@ macro_rules! impl_Unsigned {
 
                     let pair = (remain % 100) as usize;
                     remain /= 100;
-                    buf[offset + 0].write(DECIMAL_PAIRS[pair * 2 + 0]);
-                    buf[offset + 1].write(DECIMAL_PAIRS[pair * 2 + 1]);
+                    buf[offset + 0].write(DECIMAL_PAIRS.0[pair * 2 + 0]);
+                    buf[offset + 1].write(DECIMAL_PAIRS.0[pair * 2 + 1]);
                 }
 
                 // Format the last remaining digit, if any.
@@ -317,7 +321,7 @@ macro_rules! impl_Unsigned {
                     // Either the compiler sees that remain < 10, or it prevents
                     // a boundary check up next.
                     let last = (remain & 15) as usize;
-                    buf[offset].write(DECIMAL_PAIRS[last * 2 + 1]);
+                    buf[offset].write(DECIMAL_PAIRS.0[last * 2 + 1]);
                     // not used: remain = 0;
                 }
 
@@ -381,10 +385,10 @@ impl Unsigned for u128 {
             remain /= 1_00_00;
             let pair1 = (quad / 100) as usize;
             let pair2 = (quad % 100) as usize;
-            buf[offset + 0].write(DECIMAL_PAIRS[pair1 * 2 + 0]);
-            buf[offset + 1].write(DECIMAL_PAIRS[pair1 * 2 + 1]);
-            buf[offset + 2].write(DECIMAL_PAIRS[pair2 * 2 + 0]);
-            buf[offset + 3].write(DECIMAL_PAIRS[pair2 * 2 + 1]);
+            buf[offset + 0].write(DECIMAL_PAIRS.0[pair1 * 2 + 0]);
+            buf[offset + 1].write(DECIMAL_PAIRS.0[pair1 * 2 + 1]);
+            buf[offset + 2].write(DECIMAL_PAIRS.0[pair2 * 2 + 0]);
+            buf[offset + 3].write(DECIMAL_PAIRS.0[pair2 * 2 + 1]);
         }
 
         // Format per two digits from the lookup table.
@@ -403,8 +407,8 @@ impl Unsigned for u128 {
 
             let pair = (remain % 100) as usize;
             remain /= 100;
-            buf[offset + 0].write(DECIMAL_PAIRS[pair * 2 + 0]);
-            buf[offset + 1].write(DECIMAL_PAIRS[pair * 2 + 1]);
+            buf[offset + 0].write(DECIMAL_PAIRS.0[pair * 2 + 0]);
+            buf[offset + 1].write(DECIMAL_PAIRS.0[pair * 2 + 1]);
         }
 
         // Format the last remaining digit, if any.
@@ -424,7 +428,7 @@ impl Unsigned for u128 {
             // Either the compiler sees that remain < 10, or it prevents
             // a boundary check up next.
             let last = (remain & 15) as usize;
-            buf[offset].write(DECIMAL_PAIRS[last * 2 + 1]);
+            buf[offset].write(DECIMAL_PAIRS.0[last * 2 + 1]);
             // not used: remain = 0;
         }
         offset
@@ -444,10 +448,10 @@ fn enc_16lsd<const OFFSET: usize>(buf: &mut [MaybeUninit<u8>], n: u64) {
         remain /= 1_00_00;
         let pair1 = (quad / 100) as usize;
         let pair2 = (quad % 100) as usize;
-        buf[quad_index * 4 + OFFSET + 0].write(DECIMAL_PAIRS[pair1 * 2 + 0]);
-        buf[quad_index * 4 + OFFSET + 1].write(DECIMAL_PAIRS[pair1 * 2 + 1]);
-        buf[quad_index * 4 + OFFSET + 2].write(DECIMAL_PAIRS[pair2 * 2 + 0]);
-        buf[quad_index * 4 + OFFSET + 3].write(DECIMAL_PAIRS[pair2 * 2 + 1]);
+        buf[quad_index * 4 + OFFSET + 0].write(DECIMAL_PAIRS.0[pair1 * 2 + 0]);
+        buf[quad_index * 4 + OFFSET + 1].write(DECIMAL_PAIRS.0[pair1 * 2 + 1]);
+        buf[quad_index * 4 + OFFSET + 2].write(DECIMAL_PAIRS.0[pair2 * 2 + 0]);
+        buf[quad_index * 4 + OFFSET + 3].write(DECIMAL_PAIRS.0[pair2 * 2 + 1]);
     }
 }
 
