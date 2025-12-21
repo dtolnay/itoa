@@ -308,10 +308,8 @@ macro_rules! impl_Unsigned {
 
                     // Either the compiler sees that remain < 10, or it prevents
                     // a boundary check up next.
-                    let last = (remain & 15) as usize;
-                    unsafe {
-                        buf[offset].write(*DECIMAL_PAIRS.0.get_unchecked(last * 2 + 1));
-                    }
+                    let last = remain as u8 & 15;
+                    buf[offset].write(b'0' + last);
                     // not used: remain = 0;
                 }
 
@@ -390,10 +388,8 @@ impl Unsigned for u128 {
 
             // Either the compiler sees that remain < 10, or it prevents
             // a boundary check up next.
-            let last = (remain & 15) as usize;
-            unsafe {
-                buf[offset].write(*DECIMAL_PAIRS.0.get_unchecked(last * 2 + 1));
-            }
+            let last = remain as u8 & 15;
+            buf[offset].write(b'0' + last);
             // not used: remain = 0;
         }
         offset
