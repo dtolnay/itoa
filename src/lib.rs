@@ -209,7 +209,7 @@ impl_Integer_size!(usize as u32 #[cfg(target_pointer_width = "32")]);
 impl_Integer_size!(isize as i64 #[cfg(target_pointer_width = "64")]);
 impl_Integer_size!(usize as u64 #[cfg(target_pointer_width = "64")]);
 
-#[repr(align(2))]
+#[repr(C, align(2))]
 struct DecimalPairs([u8; 200]);
 
 // The string of all two-digit numbers in range 00..99 is used as a lookup table.
