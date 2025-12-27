@@ -10,10 +10,10 @@
 //! strings. The implementation comes straight from [libcore] but avoids the
 //! performance penalty of going through [`core::fmt::Formatter`].
 //!
-//! See also [`ryu`] for printing floating point primitives.
+//! See also [`zmij`] for printing floating point primitives.
 //!
 //! [libcore]: https://github.com/rust-lang/rust/blob/1.92.0/library/core/src/fmt/num.rs#L190-L253
-//! [`ryu`]: https://github.com/dtolnay/ryu
+//! [`zmij`]: https://github.com/dtolnay/zmij
 //!
 //! # Example
 //!
