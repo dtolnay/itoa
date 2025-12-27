@@ -37,7 +37,7 @@
 //!
 //! ![performance](https://raw.githubusercontent.com/dtolnay/itoa/master/itoa-benchmark.png)
 
-#![doc(html_root_url = "https://docs.rs/itoa/1.0.16")]
+#![doc(html_root_url = "https://docs.rs/itoa/1.0.17")]
 #![no_std]
 #![allow(
     clippy::cast_lossless,
