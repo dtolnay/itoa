@@ -25,9 +25,17 @@
 //! }
 //! ```
 //!
-//! # Performance (lower is better)
+//! # Performance
 //!
-//! ![performance](https://raw.githubusercontent.com/dtolnay/itoa/master/performance.png)
+//! The [itoa-benchmark] compares this library and other Rust integer formatting
+//! implementations across a range of integer sizes. The vertical axis in this
+//! chart shows nanoseconds taken by a single execution of
+//! `itoa::Buffer::new().format(value)` so a lower result indicates a faster
+//! library.
+//!
+//! [itoa-benchmark]: https://github.com/dtolnay/itoa-benchmark
+//!
+//! ![performance](https://raw.githubusercontent.com/dtolnay/itoa/master/itoa-benchmark.png)
 
 #![doc(html_root_url = "https://docs.rs/itoa/1.0.16")]
 #![no_std]
