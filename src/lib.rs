@@ -331,7 +331,83 @@ macro_rules! impl_Unsigned {
 impl_Unsigned!(u8);
 impl_Unsigned!(u16);
 impl_Unsigned!(u32);
+#[cfg(not(all(target_feature = "sse4.1", target_feature = "lzcnt")))]
 impl_Unsigned!(u64);
+
+#[cfg(all(target_feature = "sse4.1", target_feature = "lzcnt"))]
+impl Unsigned for u64 {
+    #[cfg_attr(feature = "no-panic", no_panic)]
+    fn fmt(self, buf: &mut Self::Buffer) -> usize {
+        fn to_bcd4(abcd: u16) -> u32 {
+            let abcd = u32::from(abcd);
+            let ab_cd = abcd + (0x10000 - 100) * ((abcd * 0x147b) >> 19);
+            let a_b_c_d = ab_cd + (0x100 - 10) * (((ab_cd * 0x67) >> 10) & 0xf000f);
+            a_b_c_d
+        }
+
+        let out = buf.as_mut_ptr().cast::<u32>();
+
+        if self < 10_000 {
+            let bcd = to_bcd4(self as u16);
+            let leading_zeros = (bcd | 1).leading_zeros() as usize / 8;
+            unsafe {
+                out.offset(4).write_unaligned((bcd | 0x30303030).to_be());
+            }
+            16 + leading_zeros
+        } else if self < 100_000_000 {
+            let bcd_hi = to_bcd4((self / 10_000) as u16);
+            let bcd_lo = to_bcd4((self % 10_000) as u16);
+            let leading_zeros = bcd_hi.leading_zeros() as usize / 8;
+            unsafe {
+                out.offset(3).write_unaligned((bcd_hi | 0x30303030).to_be());
+                out.offset(4).write_unaligned((bcd_lo | 0x30303030).to_be());
+            }
+            12 + leading_zeros
+        } else if self < 10_000_000_000_000_000 {
+            let hi = (self / 100_000_000) as u32;
+            let lo = (self % 100_000_000) as u32;
+            let bcd_hi_hi = to_bcd4((hi / 10_000) as u16);
+            let bcd_hi_lo = to_bcd4((hi % 10_000) as u16);
+            let bcd_lo_hi = to_bcd4((lo / 10_000) as u16);
+            let bcd_lo_lo = to_bcd4((lo % 10_000) as u16);
+            let leading_zeros =
+                ((u64::from(bcd_hi_hi) << 32) | u64::from(bcd_hi_lo)).leading_zeros() as usize / 8;
+            unsafe {
+                out.offset(1)
+                    .write_unaligned((bcd_hi_hi | 0x30303030).to_be());
+                out.offset(2)
+                    .write_unaligned((bcd_hi_lo | 0x30303030).to_be());
+                out.offset(3)
+                    .write_unaligned((bcd_lo_hi | 0x30303030).to_be());
+                out.offset(4)
+                    .write_unaligned((bcd_lo_lo | 0x30303030).to_be());
+            }
+            4 + leading_zeros
+        } else {
+            let top = self / 10_000_000_000_000_000;
+            let hi = (self % 10_000_000_000_000_000 / 100_000_000) as u32;
+            let lo = (self % 100_000_000) as u32;
+            let bcd_top = to_bcd4(top as u16);
+            let bcd_hi_hi = to_bcd4((hi / 10_000) as u16);
+            let bcd_hi_lo = to_bcd4((hi % 10_000) as u16);
+            let bcd_lo_hi = to_bcd4((lo / 10_000) as u16);
+            let bcd_lo_lo = to_bcd4((lo % 10_000) as u16);
+            let leading_zeros = bcd_top.leading_zeros() as usize / 8;
+            unsafe {
+                out.write_unaligned((bcd_top | 0x30303030).to_be());
+                out.offset(1)
+                    .write_unaligned((bcd_hi_hi | 0x30303030).to_be());
+                out.offset(2)
+                    .write_unaligned((bcd_hi_lo | 0x30303030).to_be());
+                out.offset(3)
+                    .write_unaligned((bcd_lo_hi | 0x30303030).to_be());
+                out.offset(4)
+                    .write_unaligned((bcd_lo_lo | 0x30303030).to_be());
+            }
+            leading_zeros
+        }
+    }
+}
 
 impl Unsigned for u128 {
     #[cfg_attr(feature = "no-panic", no_panic)]
