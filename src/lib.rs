@@ -55,7 +55,6 @@ mod u128_ext;
 
 use core::hint;
 use core::mem::{self, MaybeUninit};
-use core::ptr;
 use core::str;
 #[cfg(feature = "no-panic")]
 use no_panic::no_panic;
@@ -105,9 +104,8 @@ impl Buffer {
     /// representation within the buffer.
     #[cfg_attr(feature = "no-panic", no_panic)]
     pub fn format<I: Integer>(&mut self, i: I) -> &str {
-        let string = i.write(unsafe {
-            &mut *ptr::addr_of_mut!(self.bytes).cast::<<I as private::Sealed>::Buffer>()
-        });
+        let buf_ptr = self.bytes.as_mut_ptr().cast();
+        let string = i.write(unsafe { &mut *buf_ptr });
         if string.len() > I::MAX_STR_LEN {
             unsafe { hint::unreachable_unchecked() };
         }
