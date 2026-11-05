@@ -18,6 +18,8 @@ test! {
     test_u64_half(u64::from(u32::MAX), "4294967295")
     test_u64_max(u64::MAX, "18446744073709551615")
     test_i64_min(i64::MIN, "-9223372036854775808")
+    test_i64_max(i64::MAX, "9223372036854775807")
+    test_i32_neg_1(-1i32, "-1")
 
     test_i16_0(0i16, "0")
     test_i16_min(i16::MIN, "-32768")

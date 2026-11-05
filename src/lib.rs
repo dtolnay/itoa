@@ -171,10 +171,11 @@ macro_rules! impl_Integer {
                     self.unsigned_abs(),
                     (&mut buf[offset..]).try_into().unwrap(),
                 );
-                if self < 0 {
-                    offset -= 1;
-                    buf[offset].write(b'-');
-                }
+                // Always write the sign and drop it for non-negative values. A
+                // branch here mispredicts on input with mixed signs.
+                // SAFETY: The magnitude has at most MAX_STR_LEN - 1 digits.
+                unsafe { buf.get_unchecked_mut(offset - 1).write(b'-') };
+                offset -= (self < 0) as usize;
                 // SAFETY: Starting from `offset`, all elements of the slice have been set.
                 unsafe { slice_buffer_to_str(buf, offset) }
             }
